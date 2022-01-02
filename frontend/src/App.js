@@ -29,12 +29,13 @@ function Login() {
 
 function ListOfNotes({updateNoteId, updateNoteState}) {
   /// list of notes title
-  /// delete button
-  /// edit button
+  /// delete button ?
+  /// edit button ?
   /// show button
 }
 
 function ShowNote({noteId, noteState}) {
+  /// markdown support
   /// close button
   /// delete button ?
   /// edit button ?
@@ -46,7 +47,6 @@ function EditOrPostNote({onSend}) {
 }
 
 function Dashboard() {
-  /// logout
   /// ListOfNotes
   /// ShowNote if a note selected
   /// EditOrPostNote if edit or post note
