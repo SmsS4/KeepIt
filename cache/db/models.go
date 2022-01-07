@@ -10,9 +10,11 @@ type DBConfig struct {
 	Port     int
 }
 
-type User struct {
-	ID        uint
-	Name      string
+type KeyValue struct {
+	Key       string `gorm:"primaryKey;type:varchar(64)"`
+	Value     string `gorm:"type:varchar(2048)"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
+
+var keyValue KeyValue

@@ -22,12 +22,5 @@ func getConfig(configPath string) Config {
 	utils.CheckError(yaml.Unmarshal(configFile, &configMap))
 	var config Config
 	config.db = db.GetDBConfig(configMap)
-	log.Printf(
-		"DB Config: %s:%d user:%s name:%s",
-		config.db.Host,
-		config.db.Port,
-		config.db.Username,
-		config.db.Name,
-	)
 	return config
 }

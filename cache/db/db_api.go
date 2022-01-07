@@ -1,7 +1,9 @@
 package db
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/SmsS4/KeepIt/cache/utils"
@@ -19,13 +21,36 @@ func GetDBConfig(data map[string]string) DBConfig {
 	db_port, err := strconv.Atoi(data["db_port"])
 	utils.CheckError(err)
 	config.Port = db_port
+	log.Printf(
+		"DB Config: %s:%d user:%s name:%s",
+		config.Host,
+		config.Port,
+		config.Username,
+		config.Name,
+	)
 	return config
 }
 
 var dbConnection *gorm.DB
 
 func createTables() {
-	dbConnection.AutoMigrate(&User{})
+	log.Print("Creating tables")
+	dbConnection.AutoMigrate(keyValue)
+}
+
+func GetValue(key string) (KeyValue, error) {
+	log.Printf("Get key: %s", key)
+	var result KeyValue
+	report := dbConnection.First(&result, "key = ?", key)
+	if errors.Is(report.Error, gorm.ErrRecordNotFound) {
+		log.Printf("Get key: %s -> error: value not found", key)
+		return result, gorm.ErrRecordNotFound
+	}
+	return result, report.Error
+}
+
+func SetValue(key string, value string) {
+	dbConnection.Create(&KeyValue{Key: key, Value: value})
 }
 
 func CreateConnection(dbConfig DBConfig) {
