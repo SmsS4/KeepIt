@@ -50,7 +50,13 @@ func GetValue(key string) (KeyValue, error) {
 }
 
 func SetValue(key string, value string) {
-	dbConnection.Create(&KeyValue{Key: key, Value: value})
+	data := KeyValue{Key: key, Value: value}
+	if dbConnection.Model(&data).Where("Key = ?", key).Updates(&data).RowsAffected == 0 {
+		log.Printf("Set key: %s to %s", key, value)
+		dbConnection.Create(&data)
+	} else {
+		log.Printf("Update key: %s to %s", key, value)
+	}
 }
 
 func CreateConnection(dbConfig DBConfig) {
