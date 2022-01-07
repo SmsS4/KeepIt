@@ -1,0 +1,5 @@
+db_host: localhost
+db_username: db_admin
+db_password: db_admin
+db_name: db_admin
+db_port: 5432
