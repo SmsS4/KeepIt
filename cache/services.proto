@@ -1,0 +1,32 @@
+syntax = "proto3";
+package main;
+
+message Nil {
+
+}
+
+message Key {
+    string key = 1;
+}
+
+message KeyValue {
+    string key = 1;
+    string value = 2;
+}
+
+message OprationResult {
+    string error = 3;
+    string activeIp = 4;
+}
+
+message Result {
+    string value = 1;
+    bool missCache = 2;
+    OprationResult OprationResult = 3;
+}
+
+service CacheService {
+    rpc Get(Key) returns (Result) {}
+    rpc Put(KeyValue) returns (OprationResult) {}
+    rpc Clear(Nil) returns (OprationResult) {}
+}
