@@ -5,3 +5,4 @@ db_name: db_admin
 db_port: 5432
 cache_max_size: 3
 cache_partions_count: 3
+api_port: 7000

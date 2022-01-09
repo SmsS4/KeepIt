@@ -29,11 +29,15 @@ func main() {
 	// ll.MoveToTail(node3)
 	// ll.PopHead()
 
-	cp := ds.NewPartionCache(
+	partionCache := ds.NewPartionCache(
 		config.cacheConfig.MaxSize,
 		config.cacheConfig.PartionsCount,
 		db.CreateConnection(config.db),
 	)
+
+	runServer(config.apiConfig, &partionCache)
+
+	log.Print("hey")
 
 	// cp.Put("test1", "hello1")
 	// cp.Put("test2", "hello2")

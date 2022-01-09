@@ -33,34 +33,34 @@ func NewPartionCache(MaxSize int, PartionsCount int, db *db.DbConnection) Partio
 	}
 }
 
-func (cp *PartionCache) hash(s string) uint32 {
+func (partionCache *PartionCache) hash(s string) uint32 {
 	h := fnv.New32a()
 	h.Write([]byte(s))
-	return h.Sum32() % uint32(cp.PartionsCount)
+	return h.Sum32() % uint32(partionCache.PartionsCount)
 }
 
-func (cp *PartionCache) getCache(key string) *Cache {
-	return &cp.caches[cp.hash(key)]
+func (partionCache *PartionCache) getCache(key string) *Cache {
+	return &partionCache.caches[partionCache.hash(key)]
 }
 
-func (cp *PartionCache) ClearAll() {
-	cp.db.Clear()
-	for _, cache := range cp.caches {
+func (partionCache *PartionCache) ClearAll() {
+	partionCache.db.Clear()
+	for _, cache := range partionCache.caches {
 		cache.Clear()
 	}
 }
 
-func (cp *PartionCache) Get(key string) (string, bool, error) {
-	return cp.getCache(key).Get(key)
+func (partionCache *PartionCache) Get(key string) (string, bool, error) {
+	return partionCache.getCache(key).Get(key)
 }
 
-func (cp *PartionCache) Put(key string, value string) {
-	cp.getCache(key).Put(key, value)
+func (partionCache *PartionCache) Put(key string, value string) {
+	partionCache.getCache(key).Put(key, value)
 }
 
-func (cp *PartionCache) Print() {
-	log.Printf("Number of caches: %d MaxSize: %d", cp.PartionsCount, cp.MaxSize)
-	for i, cache := range cp.caches {
+func (partionCache *PartionCache) Print() {
+	log.Printf("Number of caches: %d MaxSize: %d", partionCache.PartionsCount, partionCache.MaxSize)
+	for i, cache := range partionCache.caches {
 		log.Printf("Cache-%d:", i)
 		cache.linkList.Print()
 		log.Print(cache.keyToNode)

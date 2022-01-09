@@ -15,14 +15,13 @@ message KeyValue {
 }
 
 message OprationResult {
-    string error = 3;
     string activeIp = 4;
 }
 
 message Result {
     string value = 1;
     bool missCache = 2;
-    OprationResult OprationResult = 3;
+    string activeIp = 4;
 }
 
 service CacheService {
