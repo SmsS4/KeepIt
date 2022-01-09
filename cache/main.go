@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"time"
 
+	server "github.com/SmsS4/KeepIt/cache/cache_server"
 	"github.com/SmsS4/KeepIt/cache/db"
 	"github.com/SmsS4/KeepIt/cache/ds"
 )
@@ -35,9 +37,10 @@ func main() {
 		db.CreateConnection(config.db),
 	)
 
-	runServer(config.apiConfig, &partionCache)
-
-	log.Print("hey")
+	go server.RunServer(config.apiConfig, &partionCache)
+	time.Sleep(time.Second * 2)
+	log.Print("start client")
+	server.RunApi()
 
 	// cp.Put("test1", "hello1")
 	// cp.Put("test2", "hello2")
