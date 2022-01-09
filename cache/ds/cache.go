@@ -46,7 +46,12 @@ func (cache *Cache) addToMap(key string, value string) {
 func (cache *Cache) Put(key string, value string) {
 	log.Printf("Put %s:%s to db", key, value)
 	go cache.db.SetValue(key, value)
-	cache.addToMap(key, value)
+	if node, ok := cache.keyToNode[key]; ok {
+		cache.linkList.MoveToTail(node)
+		node.Value = Pair{key, value}
+	} else {
+		cache.addToMap(key, value)
+	}
 }
 
 func (cache *Cache) Get(key string) (string, bool, error) {

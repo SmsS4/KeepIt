@@ -49,7 +49,7 @@ func RunApi() {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
 
-	log.Printf("Response get %s, value:%s active:%s miss:%d", key.Key, response.Value, response.ActiveIp, response.MissCache)
+	log.Printf("Response get %s, value:%s active:%s miss:%v", key.Key, response.Value, response.ActiveIp, response.MissCache)
 
 	key = Key{
 		Key: "Exists",
@@ -60,6 +60,6 @@ func RunApi() {
 		log.Fatalf("Error when calling SayHello: %s", err)
 	}
 
-	log.Printf("Response get %s, value:%s active:%s miss:%d", key.Key, response.Value, response.ActiveIp, response.MissCache)
+	log.Printf("Response get %s, value:%s active:%s miss:%v", key.Key, response.Value, response.ActiveIp, response.MissCache)
 
 }

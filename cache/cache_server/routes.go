@@ -11,23 +11,27 @@ import (
 )
 
 type Server struct {
+	partionCache *ds.PartionCache
 }
 
 func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
+	value, miss, err := s.partionCache.Get(key.Key)
 	return &Result{
-		Value:     "test",
-		MissCache: false,
+		Value:     value,
+		MissCache: miss,
 		ActiveIp:  "",
-	}, nil
+	}, err
 }
 
 func (s *Server) Put(ctx context.Context, keyValue *KeyValue) (*OprationResult, error) {
+	s.partionCache.Put(keyValue.Key, keyValue.Value)
 	return &OprationResult{
 		ActiveIp: "",
 	}, nil
 }
 
 func (s *Server) Clear(ctx context.Context, _ *Nil) (*OprationResult, error) {
+	s.partionCache.ClearAll()
 	return &OprationResult{
 		ActiveIp: "",
 	}, nil
@@ -39,7 +43,9 @@ func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 	if err != nil {
 		log.Fatalf("Failed to listen on port %d: %v", apiConfig.Port, err)
 	}
-	s := Server{}
+	s := Server{
+		partionCache: partionCache,
+	}
 	grpcServer := grpc.NewServer()
 	RegisterCacheServiceServer(grpcServer, &s)
 	if err := grpcServer.Serve(lis); err != nil {
