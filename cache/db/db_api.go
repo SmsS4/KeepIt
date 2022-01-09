@@ -12,6 +12,10 @@ import (
 	"gorm.io/gorm"
 )
 
+type DbConnection struct {
+	conn *gorm.DB
+}
+
 func GetDBConfig(data map[string]string) DBConfig {
 	var config DBConfig
 	config.Host = data["db_host"]
@@ -31,17 +35,15 @@ func GetDBConfig(data map[string]string) DBConfig {
 	return config
 }
 
-var dbConnection *gorm.DB
-
-func createTables() {
+func (db *DbConnection) createTables() {
 	log.Print("Creating tables")
-	dbConnection.AutoMigrate(keyValue)
+	db.conn.AutoMigrate(keyValue)
 }
 
-func GetValue(key string) (KeyValue, error) {
+func (db *DbConnection) GetValue(key string) (KeyValue, error) {
 	log.Printf("Get key: %s", key)
 	var result KeyValue
-	report := dbConnection.First(&result, "key = ?", key)
+	report := db.conn.First(&result, "key = ?", key)
 	if errors.Is(report.Error, gorm.ErrRecordNotFound) {
 		log.Printf("Get key: %s -> error: value not found", key)
 		return result, gorm.ErrRecordNotFound
@@ -49,17 +51,17 @@ func GetValue(key string) (KeyValue, error) {
 	return result, report.Error
 }
 
-func SetValue(key string, value string) {
+func (db *DbConnection) SetValue(key string, value string) {
 	data := KeyValue{Key: key, Value: value}
-	if dbConnection.Model(&data).Where("Key = ?", key).Updates(&data).RowsAffected == 0 {
+	if db.conn.Model(&data).Where("Key = ?", key).Updates(&data).RowsAffected == 0 {
 		log.Printf("Set key: %s to %s", key, value)
-		dbConnection.Create(&data)
+		db.conn.Create(&data)
 	} else {
 		log.Printf("Update key: %s to %s", key, value)
 	}
 }
 
-func CreateConnection(dbConfig DBConfig) {
+func CreateConnection(dbConfig DBConfig) DbConnection {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
 		dbConfig.Host,
@@ -70,7 +72,7 @@ func CreateConnection(dbConfig DBConfig) {
 	)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	utils.CheckError(err)
-	dbConnection = db
-
-	createTables()
+	conn := DbConnection{conn: db}
+	conn.createTables()
+	return conn
 }
