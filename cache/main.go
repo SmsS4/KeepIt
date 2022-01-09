@@ -38,7 +38,7 @@ func main() {
 	)
 
 	go server.RunServer(config.apiConfig, &partionCache)
-	time.Sleep(time.Second * 2)
+	time.Sleep(time.Second * 1)
 	log.Print("start client")
 	server.RunApi()
 

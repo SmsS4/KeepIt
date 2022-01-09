@@ -22,11 +22,11 @@ func RunApi() {
 	}
 
 	response, err := c.Get(context.Background(), &key)
-	if err != nil {
-		log.Fatalf("Error when calling SayHello: %s", err)
-	}
+	if err == nil {
+		log.Printf("Response get %s, value:%s active:%s miss:%d", key.Key, response.Value, response.ActiveIp, response.MissCache)
+		log.Fatal("x")
 
-	log.Printf("Response get %s, value:%s active:%s miss:%d", key.Key, response.Value, response.ActiveIp, response.MissCache)
+	}
 
 	keyValue := KeyValue{
 		Key:   "Exists",
