@@ -61,7 +61,7 @@ func (db *DbConnection) SetValue(key string, value string) {
 	}
 }
 
-func CreateConnection(dbConfig DBConfig) DbConnection {
+func CreateConnection(dbConfig DBConfig) *DbConnection {
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable TimeZone=Asia/Shanghai",
 		dbConfig.Host,
@@ -74,7 +74,7 @@ func CreateConnection(dbConfig DBConfig) DbConnection {
 	utils.CheckError(err)
 	conn := DbConnection{conn: db}
 	conn.createTables()
-	return conn
+	return &conn
 }
 
 func (db *DbConnection) Clear() {

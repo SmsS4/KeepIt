@@ -3,6 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"strconv"
 
 	"github.com/SmsS4/KeepIt/cache/db"
 	"github.com/SmsS4/KeepIt/cache/utils"
@@ -10,8 +11,25 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type CacheConfig struct {
+	MaxSize       int
+	PartionsCount int
+}
+
+func GetCacheConfig(configMap map[string]string) CacheConfig {
+	maxSize, err := strconv.Atoi(configMap["cache_max_size"])
+	utils.CheckError(err)
+	partionsCount, err := strconv.Atoi(configMap["cache_partions_count"])
+	utils.CheckError(err)
+	return CacheConfig{
+		MaxSize:       maxSize,
+		PartionsCount: partionsCount,
+	}
+}
+
 type Config struct {
-	db db.DBConfig
+	db          db.DBConfig
+	cacheConfig CacheConfig
 }
 
 func getConfig(configPath string) Config {
@@ -20,5 +38,8 @@ func getConfig(configPath string) Config {
 	utils.CheckError(err)
 	configMap := make(map[string]string)
 	utils.CheckError(yaml.Unmarshal(configFile, &configMap))
-	return Config{db: db.GetDBConfig(configMap)}
+	return Config{
+		db:          db.GetDBConfig(configMap),
+		cacheConfig: GetCacheConfig(configMap),
+	}
 }
