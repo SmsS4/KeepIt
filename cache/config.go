@@ -20,7 +20,5 @@ func getConfig(configPath string) Config {
 	utils.CheckError(err)
 	configMap := make(map[string]string)
 	utils.CheckError(yaml.Unmarshal(configFile, &configMap))
-	var config Config
-	config.db = db.GetDBConfig(configMap)
-	return config
+	return Config{db: db.GetDBConfig(configMap)}
 }
