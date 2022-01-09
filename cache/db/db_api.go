@@ -76,3 +76,7 @@ func CreateConnection(dbConfig DBConfig) DbConnection {
 	conn.createTables()
 	return conn
 }
+
+func (db *DbConnection) Clear() {
+	db.conn.Session(&gorm.Session{AllowGlobalUpdate: true}).Delete(&KeyValue{})
+}

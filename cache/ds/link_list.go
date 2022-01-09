@@ -6,21 +6,26 @@ import (
 	"sync"
 )
 
+type Pair struct {
+	Key   string
+	Value string
+}
+
 type Node struct {
-	value string
+	Value Pair
 	next  *Node
 	prev  *Node
 }
 
-func NewNode(value string) Node {
+func NewNode(value Pair) Node {
 	return Node{value, nil, nil}
 }
 
-func getValue(node *Node) string {
+func getValue(node *Node) Pair {
 	if node == nil {
-		return "nil"
+		return Pair{"nil", ""}
 	}
-	return node.value
+	return node.Value
 }
 
 func (node *Node) PrintNode() {
@@ -44,7 +49,7 @@ func NewLinkList() LinkList {
 }
 
 func (ll *LinkList) remove(node *Node) {
-	log.Printf("\tremove %s from tail", node.value)
+	log.Printf("\tremove %s from tail", node.Value)
 	ll.Size -= 1
 	if node.prev != nil {
 		node.prev.next = node.next
@@ -63,7 +68,7 @@ func (ll *LinkList) remove(node *Node) {
 }
 
 func (ll *LinkList) MoveToTail(node *Node) {
-	log.Printf("Move %s to tail", node.value)
+	log.Printf("Move %s to tail", node.Value)
 	ll.lock.Lock()
 	ll.remove(node)
 	ll.append(node)
@@ -71,16 +76,18 @@ func (ll *LinkList) MoveToTail(node *Node) {
 	ll.lock.Unlock()
 }
 
-func (ll *LinkList) PopHead() {
+func (ll *LinkList) PopHead() *Node {
 	ll.lock.Lock()
 	log.Print("Remove head from link list\n")
+	node := ll.head
 	ll.remove(ll.head)
 	ll.Print()
 	ll.lock.Unlock()
+	return node
 }
 
 func (ll *LinkList) append(node *Node) {
-	log.Printf("\tappend %s to tail", node.value)
+	log.Printf("\tappend %s to tail", node.Value)
 	ll.Size += 1
 	if ll.head == nil {
 		ll.head = node
@@ -93,7 +100,7 @@ func (ll *LinkList) append(node *Node) {
 	}
 }
 
-func (ll *LinkList) AppendValue(value string) *Node {
+func (ll *LinkList) AppendValue(value Pair) *Node {
 	log.Printf("Append %s to link list", value)
 	node := NewNode(value)
 	ll.lock.Lock()
@@ -111,7 +118,7 @@ func (ll *LinkList) Print() {
 		values := ""
 		cur := ll.head
 		for cur != nil {
-			values += fmt.Sprintf("(%s)->", cur.value)
+			values += fmt.Sprintf("(%s)->", cur.Value)
 			cur = cur.next
 		}
 		log.Print(values)
