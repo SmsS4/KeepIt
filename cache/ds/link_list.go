@@ -7,9 +7,9 @@ import (
 )
 
 type Node struct {
-	Value string
-	Next  *Node
-	Prev  *Node
+	value string
+	next  *Node
+	prev  *Node
 }
 
 func NewNode(value string) Node {
@@ -20,21 +20,21 @@ func getValue(node *Node) string {
 	if node == nil {
 		return "nil"
 	}
-	return node.Value
+	return node.value
 }
 
 func (node *Node) PrintNode() {
 	log.Printf(
 		"(%s) -> (%s) -> (%s)",
-		getValue(node.Prev),
+		getValue(node.prev),
 		getValue(node),
-		getValue(node.Next),
+		getValue(node.next),
 	)
 }
 
 type LinkList struct {
-	Head *Node
-	Tail *Node
+	head *Node
+	tail *Node
 	Size int
 	lock *sync.Mutex
 }
@@ -44,26 +44,26 @@ func NewLinkList() LinkList {
 }
 
 func (ll *LinkList) remove(node *Node) {
-	log.Printf("\tremove %s from tail", node.Value)
+	log.Printf("\tremove %s from tail", node.value)
 	ll.Size -= 1
-	if node.Prev != nil {
-		node.Prev.Next = node.Next
+	if node.prev != nil {
+		node.prev.next = node.next
 	}
-	if node.Next != nil {
-		node.Next.Prev = node.Prev
+	if node.next != nil {
+		node.next.prev = node.prev
 	}
-	if ll.Tail == node {
-		ll.Tail = node.Prev
+	if ll.tail == node {
+		ll.tail = node.prev
 	}
-	if ll.Head == node {
-		ll.Head = node.Next
+	if ll.head == node {
+		ll.head = node.next
 	}
-	node.Prev = nil
-	node.Next = nil
+	node.prev = nil
+	node.next = nil
 }
 
 func (ll *LinkList) MoveToTail(node *Node) {
-	log.Printf("Move %s to tail", node.Value)
+	log.Printf("Move %s to tail", node.value)
 	ll.lock.Lock()
 	ll.remove(node)
 	ll.append(node)
@@ -74,22 +74,22 @@ func (ll *LinkList) MoveToTail(node *Node) {
 func (ll *LinkList) PopHead() {
 	ll.lock.Lock()
 	log.Print("Remove head from link list\n")
-	ll.remove(ll.Head)
+	ll.remove(ll.head)
 	ll.Print()
 	ll.lock.Unlock()
 }
 
 func (ll *LinkList) append(node *Node) {
-	log.Printf("\tappend %s to tail", node.Value)
+	log.Printf("\tappend %s to tail", node.value)
 	ll.Size += 1
-	if ll.Head == nil {
-		ll.Head = node
-		ll.Tail = node
+	if ll.head == nil {
+		ll.head = node
+		ll.tail = node
 	} else {
 		ll.Print()
-		ll.Tail.Next = node
-		node.Prev = ll.Tail
-		ll.Tail = node
+		ll.tail.next = node
+		node.prev = ll.tail
+		ll.tail = node
 	}
 }
 
@@ -104,15 +104,15 @@ func (ll *LinkList) AppendValue(value string) *Node {
 }
 
 func (ll *LinkList) Print() {
-	if ll.Head == nil {
+	if ll.head == nil {
 		log.Print("LL is empty\n")
 	} else {
 		log.Printf("LL size is %d\n", ll.Size)
 		values := ""
-		cur := ll.Head
+		cur := ll.head
 		for cur != nil {
-			values += fmt.Sprintf("(%s)->", cur.Value)
-			cur = cur.Next
+			values += fmt.Sprintf("(%s)->", cur.value)
+			cur = cur.next
 		}
 		log.Print(values)
 	}
