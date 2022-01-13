@@ -24,8 +24,28 @@ message Result {
     string activeIp = 4;
 }
 
+message Data {
+    string fromIp = 1;
+    int32 fromPort = 2;
+    bool distribute = 3;
+}
+
+message DistKeyValue {
+    string key = 1;
+    string value = 2;
+    Data data = 3; 
+}
+
+
+
 service CacheService {
     rpc Get(Key) returns (Result) {}
     rpc Put(KeyValue) returns (OprationResult) {}
     rpc Clear(Nil) returns (OprationResult) {}
+
+    rpc Use(DistKeyValue) returns (Nil) {}
+    rpc ClearDist(Data) returns (Nil) {}
+    rpc Check(Nil) returns (Nil) {}
+    rpc ImAlive(Data) returns (Nil) {}
 }
+

@@ -43,26 +43,34 @@ func (cache *Cache) addToMap(key string, value string) {
 	cache.relax()
 }
 
-func (cache *Cache) Put(key string, value string) {
-	log.Printf("Put %s:%s to db", key, value)
-	go cache.db.SetValue(key, value)
+func (cache *Cache) Touch(key string, value string) {
+	cache.lock.Lock()
 	if node, ok := cache.keyToNode[key]; ok {
 		cache.linkList.MoveToTail(node)
-		node.Value = Pair{key, value}
 	} else {
 		cache.addToMap(key, value)
 	}
+	cache.lock.Unlock()
+}
+
+func (cache *Cache) Put(key string, value string) {
+	log.Printf("Put %s:%s to db", key, value)
+	go cache.db.SetValue(key, value)
+	cache.Touch(key, value)
 }
 
 func (cache *Cache) Get(key string) (string, bool, error) {
+	cache.lock.Lock()
 	if node, ok := cache.keyToNode[key]; ok {
 		log.Printf("Get %s from cache", key)
 		cache.linkList.MoveToTail(node)
+		cache.lock.Unlock()
 		return node.Value.Value, true, nil
 	} else {
 		log.Printf("Get %s from db", key)
 		value, err := cache.db.GetValue(key)
 		cache.addToMap(value.Key, value.Value)
+		cache.lock.Unlock()
 		return value.Value, false, err
 	}
 }

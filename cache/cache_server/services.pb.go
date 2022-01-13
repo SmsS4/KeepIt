@@ -235,34 +235,153 @@ func (m *Result) GetActiveIp() string {
 	return ""
 }
 
+type Data struct {
+	FromIp               string   `protobuf:"bytes,1,opt,name=fromIp,proto3" json:"fromIp,omitempty"`
+	FromPort             int32    `protobuf:"varint,2,opt,name=fromPort,proto3" json:"fromPort,omitempty"`
+	Distribute           bool     `protobuf:"varint,3,opt,name=distribute,proto3" json:"distribute,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *Data) Reset()         { *m = Data{} }
+func (m *Data) String() string { return proto.CompactTextString(m) }
+func (*Data) ProtoMessage()    {}
+func (*Data) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e16ccb8c5307b32, []int{5}
+}
+
+func (m *Data) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_Data.Unmarshal(m, b)
+}
+func (m *Data) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_Data.Marshal(b, m, deterministic)
+}
+func (m *Data) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Data.Merge(m, src)
+}
+func (m *Data) XXX_Size() int {
+	return xxx_messageInfo_Data.Size(m)
+}
+func (m *Data) XXX_DiscardUnknown() {
+	xxx_messageInfo_Data.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Data proto.InternalMessageInfo
+
+func (m *Data) GetFromIp() string {
+	if m != nil {
+		return m.FromIp
+	}
+	return ""
+}
+
+func (m *Data) GetFromPort() int32 {
+	if m != nil {
+		return m.FromPort
+	}
+	return 0
+}
+
+func (m *Data) GetDistribute() bool {
+	if m != nil {
+		return m.Distribute
+	}
+	return false
+}
+
+type DistKeyValue struct {
+	Key                  string   `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value                string   `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	Data                 *Data    `protobuf:"bytes,3,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *DistKeyValue) Reset()         { *m = DistKeyValue{} }
+func (m *DistKeyValue) String() string { return proto.CompactTextString(m) }
+func (*DistKeyValue) ProtoMessage()    {}
+func (*DistKeyValue) Descriptor() ([]byte, []int) {
+	return fileDescriptor_8e16ccb8c5307b32, []int{6}
+}
+
+func (m *DistKeyValue) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_DistKeyValue.Unmarshal(m, b)
+}
+func (m *DistKeyValue) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_DistKeyValue.Marshal(b, m, deterministic)
+}
+func (m *DistKeyValue) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_DistKeyValue.Merge(m, src)
+}
+func (m *DistKeyValue) XXX_Size() int {
+	return xxx_messageInfo_DistKeyValue.Size(m)
+}
+func (m *DistKeyValue) XXX_DiscardUnknown() {
+	xxx_messageInfo_DistKeyValue.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_DistKeyValue proto.InternalMessageInfo
+
+func (m *DistKeyValue) GetKey() string {
+	if m != nil {
+		return m.Key
+	}
+	return ""
+}
+
+func (m *DistKeyValue) GetValue() string {
+	if m != nil {
+		return m.Value
+	}
+	return ""
+}
+
+func (m *DistKeyValue) GetData() *Data {
+	if m != nil {
+		return m.Data
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*Nil)(nil), "server.Nil")
 	proto.RegisterType((*Key)(nil), "server.Key")
 	proto.RegisterType((*KeyValue)(nil), "server.KeyValue")
 	proto.RegisterType((*OprationResult)(nil), "server.OprationResult")
 	proto.RegisterType((*Result)(nil), "server.Result")
+	proto.RegisterType((*Data)(nil), "server.Data")
+	proto.RegisterType((*DistKeyValue)(nil), "server.DistKeyValue")
 }
 
 func init() { proto.RegisterFile("services.proto", fileDescriptor_8e16ccb8c5307b32) }
 
 var fileDescriptor_8e16ccb8c5307b32 = []byte{
-	// 246 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x7c, 0x91, 0xc1, 0x4a, 0xc4, 0x30,
-	0x18, 0x84, 0xb7, 0xc6, 0x96, 0xee, 0xaf, 0x94, 0xe5, 0x47, 0xb4, 0x14, 0x0f, 0x12, 0x3c, 0x78,
-	0x90, 0x82, 0xeb, 0x23, 0xec, 0x41, 0xa4, 0xb0, 0x4a, 0x05, 0xf1, 0x1a, 0xcb, 0x0f, 0x06, 0xa3,
-	0x2d, 0x49, 0x5a, 0xc8, 0x93, 0xf8, 0xba, 0xd2, 0xc4, 0xdd, 0xad, 0x88, 0x7b, 0xcb, 0xcc, 0x7c,
-	0x4c, 0x32, 0x04, 0x32, 0x43, 0x7a, 0x90, 0x0d, 0x99, 0xb2, 0xd3, 0xad, 0x6d, 0x31, 0x19, 0x35,
-	0x69, 0x1e, 0x03, 0x5b, 0x4b, 0xc5, 0xcf, 0x80, 0x55, 0xe4, 0x70, 0x01, 0xec, 0x9d, 0x5c, 0x1e,
-	0x5d, 0x44, 0x57, 0xf3, 0x7a, 0x3c, 0xf2, 0x25, 0xa4, 0x15, 0xb9, 0x67, 0xa1, 0x7a, 0xfa, 0x9b,
-	0xe2, 0x09, 0xc4, 0xc3, 0x18, 0xe5, 0x07, 0xde, 0x0b, 0x82, 0x5f, 0x43, 0xf6, 0xd0, 0x69, 0x61,
-	0x65, 0xfb, 0x59, 0x93, 0xe9, 0x95, 0xc5, 0x02, 0x52, 0xd1, 0x58, 0x39, 0xd0, 0x7d, 0x97, 0x1f,
-	0x7a, 0x74, 0xab, 0xf9, 0x0b, 0x24, 0x3f, 0xd4, 0xb6, 0x2d, 0x9a, 0xb4, 0xe1, 0x39, 0xcc, 0x3f,
-	0xa4, 0x31, 0x2b, 0xd1, 0xbc, 0x85, 0x7b, 0xd2, 0x7a, 0x67, 0xec, 0x6b, 0x5e, 0x7e, 0x45, 0x70,
-	0xec, 0xa9, 0xa7, 0xb0, 0x1d, 0x2f, 0x81, 0xdd, 0x91, 0xc5, 0xa3, 0x32, 0x8c, 0x2f, 0x2b, 0x72,
-	0x45, 0xb6, 0x11, 0xe1, 0x11, 0x7c, 0x86, 0x37, 0xc0, 0x1e, 0x7b, 0x8b, 0x8b, 0x09, 0xe5, 0xf7,
-	0x17, 0xa7, 0x1b, 0xe7, 0xf7, 0x3a, 0x3e, 0xc3, 0x12, 0xe2, 0x95, 0x22, 0xa1, 0x77, 0xd5, 0x6b,
-	0xa9, 0xfe, 0xe7, 0x5f, 0x13, 0xff, 0x09, 0xb7, 0xdf, 0x01, 0x00, 0x00, 0xff, 0xff, 0x41, 0x90,
-	0x5a, 0xc1, 0x96, 0x01, 0x00, 0x00,
+	// 366 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x92, 0xe1, 0xaa, 0xda, 0x40,
+	0x10, 0x85, 0xd5, 0x98, 0x54, 0x47, 0x11, 0x19, 0xc4, 0x86, 0x50, 0x8a, 0x6c, 0x4b, 0x91, 0x52,
+	0x02, 0xb5, 0x4f, 0x50, 0x14, 0x8a, 0x08, 0x56, 0x52, 0x5a, 0xa4, 0xff, 0xd6, 0x38, 0xc5, 0xc5,
+	0xd8, 0x84, 0xdd, 0x4d, 0x20, 0xaf, 0x76, 0x9f, 0xee, 0x92, 0x8d, 0xc6, 0xe8, 0x05, 0xe1, 0xfe,
+	0xdb, 0x33, 0x73, 0xf2, 0xed, 0xd9, 0x99, 0xc0, 0x40, 0x91, 0xcc, 0x44, 0x48, 0xca, 0x4f, 0x64,
+	0xac, 0x63, 0x74, 0x0a, 0x4d, 0x92, 0xd9, 0x60, 0xad, 0x45, 0xc4, 0xde, 0x82, 0xb5, 0xa2, 0x1c,
+	0x87, 0x60, 0x1d, 0x29, 0x77, 0x9b, 0x93, 0xe6, 0xb4, 0x1b, 0x14, 0x47, 0x36, 0x83, 0xce, 0x8a,
+	0xf2, 0x3f, 0x3c, 0x4a, 0xe9, 0x65, 0x17, 0x47, 0x60, 0x67, 0x45, 0xcb, 0x6d, 0x99, 0x5a, 0x29,
+	0xd8, 0x17, 0x18, 0xfc, 0x4c, 0x24, 0xd7, 0x22, 0xfe, 0x1f, 0x90, 0x4a, 0x23, 0x8d, 0x1e, 0x74,
+	0x78, 0xa8, 0x45, 0x46, 0xcb, 0xc4, 0x6d, 0x1b, 0x6b, 0xa5, 0xd9, 0x16, 0x9c, 0xb3, 0xab, 0xa2,
+	0x35, 0x6b, 0x34, 0x7c, 0x07, 0xdd, 0x93, 0x50, 0x6a, 0xce, 0xc3, 0x43, 0x79, 0x4f, 0x27, 0xb8,
+	0x16, 0x1e, 0x92, 0xff, 0x42, 0x7b, 0xc1, 0x35, 0xc7, 0x31, 0x38, 0xff, 0x64, 0x7c, 0x5a, 0x26,
+	0x67, 0xf0, 0x59, 0x15, 0xdf, 0x16, 0xa7, 0x4d, 0x2c, 0xb5, 0x01, 0xdb, 0x41, 0xa5, 0xf1, 0x3d,
+	0xc0, 0x5e, 0x28, 0x2d, 0xc5, 0x2e, 0xd5, 0xe4, 0x5a, 0xe6, 0xda, 0x5a, 0x85, 0x6d, 0xa1, 0xbf,
+	0x10, 0x4a, 0xbf, 0x76, 0x36, 0x38, 0x81, 0xf6, 0x9e, 0x6b, 0x6e, 0x88, 0xbd, 0x59, 0xdf, 0x2f,
+	0xd7, 0xe0, 0x17, 0x39, 0x03, 0xd3, 0x99, 0x3d, 0xb5, 0xa0, 0x6f, 0xde, 0xf6, 0xab, 0xdc, 0x18,
+	0x7e, 0x04, 0xeb, 0x07, 0x69, 0xec, 0x5d, 0xbc, 0x2b, 0xca, 0xbd, 0xc1, 0x45, 0x94, 0xa3, 0x63,
+	0x0d, 0xfc, 0x0a, 0xd6, 0x26, 0xd5, 0x38, 0xac, 0xb9, 0x4c, 0x32, 0x6f, 0x7c, 0xa9, 0xdc, 0xee,
+	0x84, 0x35, 0xd0, 0x07, 0x7b, 0x1e, 0x11, 0x97, 0x57, 0xf4, 0x5a, 0x44, 0x0f, 0xfc, 0x9f, 0xc1,
+	0xfa, 0xad, 0x08, 0x47, 0x55, 0xe8, 0xda, 0x00, 0xbc, 0x3a, 0x83, 0x35, 0x70, 0x0a, 0x5d, 0xc3,
+	0x2e, 0x3c, 0x78, 0xf3, 0xcc, 0x7b, 0xe7, 0x07, 0xb0, 0xe7, 0x07, 0x0a, 0x8f, 0xb7, 0x29, 0xee,
+	0x4c, 0x9f, 0xe0, 0xcd, 0xf2, 0xf4, 0x3d, 0x12, 0x19, 0x3d, 0x84, 0xed, 0x1c, 0xf3, 0x77, 0x7f,
+	0x7b, 0x0e, 0x00, 0x00, 0xff, 0xff, 0xb3, 0xd9, 0x60, 0x1f, 0xef, 0x02, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -280,6 +399,10 @@ type CacheServiceClient interface {
 	Get(ctx context.Context, in *Key, opts ...grpc.CallOption) (*Result, error)
 	Put(ctx context.Context, in *KeyValue, opts ...grpc.CallOption) (*OprationResult, error)
 	Clear(ctx context.Context, in *Nil, opts ...grpc.CallOption) (*OprationResult, error)
+	Use(ctx context.Context, in *DistKeyValue, opts ...grpc.CallOption) (*Nil, error)
+	ClearDist(ctx context.Context, in *Data, opts ...grpc.CallOption) (*Nil, error)
+	Check(ctx context.Context, in *Nil, opts ...grpc.CallOption) (*Nil, error)
+	ImAlive(ctx context.Context, in *Data, opts ...grpc.CallOption) (*Nil, error)
 }
 
 type cacheServiceClient struct {
@@ -317,11 +440,51 @@ func (c *cacheServiceClient) Clear(ctx context.Context, in *Nil, opts ...grpc.Ca
 	return out, nil
 }
 
+func (c *cacheServiceClient) Use(ctx context.Context, in *DistKeyValue, opts ...grpc.CallOption) (*Nil, error) {
+	out := new(Nil)
+	err := c.cc.Invoke(ctx, "/server.CacheService/Use", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheServiceClient) ClearDist(ctx context.Context, in *Data, opts ...grpc.CallOption) (*Nil, error) {
+	out := new(Nil)
+	err := c.cc.Invoke(ctx, "/server.CacheService/ClearDist", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheServiceClient) Check(ctx context.Context, in *Nil, opts ...grpc.CallOption) (*Nil, error) {
+	out := new(Nil)
+	err := c.cc.Invoke(ctx, "/server.CacheService/Check", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *cacheServiceClient) ImAlive(ctx context.Context, in *Data, opts ...grpc.CallOption) (*Nil, error) {
+	out := new(Nil)
+	err := c.cc.Invoke(ctx, "/server.CacheService/ImAlive", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // CacheServiceServer is the server API for CacheService service.
 type CacheServiceServer interface {
 	Get(context.Context, *Key) (*Result, error)
 	Put(context.Context, *KeyValue) (*OprationResult, error)
 	Clear(context.Context, *Nil) (*OprationResult, error)
+	Use(context.Context, *DistKeyValue) (*Nil, error)
+	ClearDist(context.Context, *Data) (*Nil, error)
+	Check(context.Context, *Nil) (*Nil, error)
+	ImAlive(context.Context, *Data) (*Nil, error)
 }
 
 // UnimplementedCacheServiceServer can be embedded to have forward compatible implementations.
@@ -336,6 +499,18 @@ func (*UnimplementedCacheServiceServer) Put(ctx context.Context, req *KeyValue) 
 }
 func (*UnimplementedCacheServiceServer) Clear(ctx context.Context, req *Nil) (*OprationResult, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Clear not implemented")
+}
+func (*UnimplementedCacheServiceServer) Use(ctx context.Context, req *DistKeyValue) (*Nil, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Use not implemented")
+}
+func (*UnimplementedCacheServiceServer) ClearDist(ctx context.Context, req *Data) (*Nil, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ClearDist not implemented")
+}
+func (*UnimplementedCacheServiceServer) Check(ctx context.Context, req *Nil) (*Nil, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
+}
+func (*UnimplementedCacheServiceServer) ImAlive(ctx context.Context, req *Data) (*Nil, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ImAlive not implemented")
 }
 
 func RegisterCacheServiceServer(s *grpc.Server, srv CacheServiceServer) {
@@ -396,6 +571,78 @@ func _CacheService_Clear_Handler(srv interface{}, ctx context.Context, dec func(
 	return interceptor(ctx, in, info, handler)
 }
 
+func _CacheService_Use_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DistKeyValue)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).Use(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.CacheService/Use",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).Use(ctx, req.(*DistKeyValue))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CacheService_ClearDist_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Data)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).ClearDist(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.CacheService/ClearDist",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).ClearDist(ctx, req.(*Data))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CacheService_Check_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Nil)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).Check(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.CacheService/Check",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).Check(ctx, req.(*Nil))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _CacheService_ImAlive_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Data)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(CacheServiceServer).ImAlive(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/server.CacheService/ImAlive",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(CacheServiceServer).ImAlive(ctx, req.(*Data))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _CacheService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "server.CacheService",
 	HandlerType: (*CacheServiceServer)(nil),
@@ -411,6 +658,22 @@ var _CacheService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Clear",
 			Handler:    _CacheService_Clear_Handler,
+		},
+		{
+			MethodName: "Use",
+			Handler:    _CacheService_Use_Handler,
+		},
+		{
+			MethodName: "ClearDist",
+			Handler:    _CacheService_ClearDist_Handler,
+		},
+		{
+			MethodName: "Check",
+			Handler:    _CacheService_Check_Handler,
+		},
+		{
+			MethodName: "ImAlive",
+			Handler:    _CacheService_ImAlive_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

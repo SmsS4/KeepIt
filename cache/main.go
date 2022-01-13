@@ -37,7 +37,7 @@ func main() {
 		db.CreateConnection(config.dbConfig),
 	)
 
-	go server.RunServerCache(config.apiConfig, &partionCache)
+	go server.RunServer(config.apiConfig, &partionCache)
 	time.Sleep(time.Second * 1)
 	log.Print("start client")
 	server.RunApi()
@@ -52,6 +52,6 @@ func main() {
 	partionCache.Put("test8", "hello8")
 	partionCache.Put("test9", "hello9")
 	partionCache.Get("test1")
-	partionCache.ClearAll()
+	partionCache.ClearAll(true)
 	partionCache.Print()
 }

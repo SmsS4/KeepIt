@@ -63,8 +63,14 @@ func (partionCache *PartionCache) getCache(key string) *Cache {
 	return &partionCache.caches[partionCache.hash(key)]
 }
 
-func (partionCache *PartionCache) ClearAll() {
-	go partionCache.db.Clear()
+func (partionCache *PartionCache) Touch(key string, value string) {
+	partionCache.getCache(key).Touch(key, value)
+}
+
+func (partionCache *PartionCache) ClearAll(deleteFromDb bool) {
+	if deleteFromDb {
+		go partionCache.db.Clear()
+	}
 	for _, cache := range partionCache.caches {
 		cache.Clear()
 	}
