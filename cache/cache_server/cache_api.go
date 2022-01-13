@@ -23,7 +23,13 @@ func RunApi() {
 
 	response, err := c.Get(context.Background(), &key)
 	if err == nil {
-		log.Printf("Response get %s, value:%s active:%s miss:%d", key.Key, response.Value, response.ActiveIp, response.MissCache)
+		log.Printf(
+			"Response get %s, value:%s active:%s miss:%v",
+			key.Key,
+			response.Value,
+			response.ActiveIp,
+			response.MissCache,
+		)
 		log.Fatal("x")
 
 	}

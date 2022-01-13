@@ -28,12 +28,12 @@ func (s *Server) CheckActiveIp() bool {
 		_, err := conn.Check(context.Background(), &Nil{})
 		if s.config.Ip == instance.Ip && s.config.Port == instance.Port {
 			s.activeIp = s.myIp
-			log.Print("New active is %s (me)", s.activeIp)
+			log.Printf("New active is %s (me)", s.activeIp)
 			return false
 		}
 		if err == nil {
 			s.activeIp = fmt.Sprintf("%s:%d", instance.Ip, instance.Port)
-			log.Print("New active is %s", s.activeIp)
+			log.Printf("New active is %s", s.activeIp)
 			return true
 		}
 	}

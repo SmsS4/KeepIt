@@ -47,7 +47,15 @@ func GetApiConfig(configMap map[string]string) ApiConfig {
 	})
 	for i := 1; i < len(instances); i++ {
 		if instances[i].Priority == instances[i-1].Priority {
-			log.Fatalf("Two instances have same priority: %s and %s", instances[i], instances[i-1])
+			log.Fatalf(
+				"Two instances have same priority: %s:%d:%d and %s:%d:%d",
+				instances[i].Ip,
+				instances[i].Port,
+				instances[i].Priority,
+				instances[i-1].Ip,
+				instances[i-1].Port,
+				instances[i-1].Priority,
+			)
 		}
 	}
 	return ApiConfig{
