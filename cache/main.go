@@ -12,6 +12,7 @@ import (
 func main() {
 	log.Print("Starting server...")
 	config := getConfig("config.yml")
+	// config = config
 	// dbConn := db.CreateConnection(config.db)
 	// dbConn.SetValue("test_key", "test_value2")
 	// kv, e := dbConn.GetValue("test_key")
@@ -32,25 +33,25 @@ func main() {
 	// ll.PopHead()
 
 	partionCache := ds.NewPartionCache(
-		config.cacheConfig.MaxSize,
-		config.cacheConfig.PartionsCount,
-		db.CreateConnection(config.db),
+		config.cacheConfig,
+		db.CreateConnection(config.dbConfig),
 	)
 
-	go server.RunServer(config.apiConfig, &partionCache)
+	go server.RunServerCache(config.apiConfig, &partionCache)
 	time.Sleep(time.Second * 1)
 	log.Print("start client")
 	server.RunApi()
 
-	// cp.Put("test1", "hello1")
-	// cp.Put("test2", "hello2")
-	// cp.Put("test3", "hello3")
-	// cp.Put("test4", "hello4")
-	// cp.Put("test5", "hello5")
-	// cp.Put("test6", "hello6")
-	// cp.Put("test7", "hello7")
-	// cp.Put("test8", "hello8")
-	// cp.Put("test9", "hello9")
-	// cp.Get("test1")
-	// cp.Print()
+	partionCache.Put("test1", "hello1")
+	partionCache.Put("test2", "hello2")
+	partionCache.Put("test3", "hello3")
+	partionCache.Put("test4", "hello4")
+	partionCache.Put("test5", "hello5")
+	partionCache.Put("test6", "hello6")
+	partionCache.Put("test7", "hello7")
+	partionCache.Put("test8", "hello8")
+	partionCache.Put("test9", "hello9")
+	partionCache.Get("test1")
+	partionCache.ClearAll()
+	partionCache.Print()
 }

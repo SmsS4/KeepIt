@@ -69,6 +69,8 @@ func (cache *Cache) Get(key string) (string, bool, error) {
 
 func (cache *Cache) Clear() {
 	log.Print("Clear cache")
+	cache.lock.Lock()
 	cache.linkList = NewLinkList()
 	cache.keyToNode = make(map[string]*Node)
+	cache.lock.Unlock()
 }

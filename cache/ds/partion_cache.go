@@ -3,10 +3,30 @@ package ds
 import (
 	"hash/fnv"
 	"log"
+	"strconv"
 	"sync"
 
 	"github.com/SmsS4/KeepIt/cache/db"
+	"github.com/SmsS4/KeepIt/cache/utils"
 )
+
+type CacheConfig struct {
+	MaxSize       int
+	PartionsCount int
+}
+
+func GetCacheConfig(configMap map[string]string) CacheConfig {
+	log.Print("Getting cache config")
+	maxSize, err := strconv.Atoi(configMap["max_size"])
+	utils.CheckError(err)
+	partionsCount, err := strconv.Atoi(configMap["partions_count"])
+	utils.CheckError(err)
+	log.Printf("Got cache config MaxSize: %d, PartionsCount: %d", maxSize, partionsCount)
+	return CacheConfig{
+		MaxSize:       maxSize,
+		PartionsCount: partionsCount,
+	}
+}
 
 type PartionCache struct {
 	MaxSize       int
@@ -16,17 +36,17 @@ type PartionCache struct {
 	lock          *sync.Mutex
 }
 
-func NewPartionCache(MaxSize int, PartionsCount int, db *db.DbConnection) PartionCache {
-	caches := make([]Cache, PartionsCount)
-	for i := 0; i < PartionsCount; i++ {
+func NewPartionCache(Config CacheConfig, db *db.DbConnection) PartionCache {
+	caches := make([]Cache, Config.PartionsCount)
+	for i := 0; i < Config.PartionsCount; i++ {
 		caches[i] = NewCache(
-			MaxSize,
+			Config.MaxSize,
 			db,
 		)
 	}
 	return PartionCache{
-		MaxSize:       MaxSize,
-		PartionsCount: PartionsCount,
+		MaxSize:       Config.MaxSize,
+		PartionsCount: Config.PartionsCount,
 		caches:        caches,
 		db:            db,
 		lock:          new(sync.Mutex),
@@ -44,7 +64,7 @@ func (partionCache *PartionCache) getCache(key string) *Cache {
 }
 
 func (partionCache *PartionCache) ClearAll() {
-	partionCache.db.Clear()
+	go partionCache.db.Clear()
 	for _, cache := range partionCache.caches {
 		cache.Clear()
 	}

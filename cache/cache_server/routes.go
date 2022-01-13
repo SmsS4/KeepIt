@@ -37,7 +37,7 @@ func (s *Server) Clear(ctx context.Context, _ *Nil) (*OprationResult, error) {
 	}, nil
 }
 
-func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
+func RunServerCache(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 	log.Printf("Starting server on port %d", apiConfig.Port)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", apiConfig.Port))
 	if err != nil {
@@ -51,4 +51,11 @@ func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server over port %d: %v", apiConfig.Port, err)
 	}
+}
+
+type Distribution struct {
+}
+
+func RunServerDistribution() {
+
 }

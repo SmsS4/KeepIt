@@ -17,12 +17,13 @@ type DbConnection struct {
 }
 
 func GetDBConfig(data map[string]string) DBConfig {
+	log.Print("Geting db config")
 	var config DBConfig
-	config.Host = data["db_host"]
-	config.Username = data["db_username"]
-	config.Password = data["db_password"]
-	config.Name = data["db_name"]
-	db_port, err := strconv.Atoi(data["db_port"])
+	config.Host = data["host"]
+	config.Username = data["username"]
+	config.Password = data["password"]
+	config.Name = data["name"]
+	db_port, err := strconv.Atoi(data["port"])
 	utils.CheckError(err)
 	config.Port = db_port
 	log.Printf(
