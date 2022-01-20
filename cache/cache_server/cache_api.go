@@ -10,7 +10,7 @@ import (
 func RunApi() {
 
 	var conn *grpc.ClientConn
-	cert, err := loadTLSCredentials()
+	cert, err := LoadTLSCredentials()
 	conn, err = grpc.Dial(":7000", grpc.WithTransportCredentials(cert))
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)

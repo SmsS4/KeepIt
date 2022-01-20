@@ -186,7 +186,7 @@ func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 	}
 }
 
-func loadTLSCredentials() (credentials.TransportCredentials, error) {
+func LoadTLSCredentials() (credentials.TransportCredentials, error) {
 	pemServerCA, err := ioutil.ReadFile("cert/ca-cert.pem")
 	if err != nil {
 		return nil, err
@@ -203,7 +203,7 @@ func loadTLSCredentials() (credentials.TransportCredentials, error) {
 
 func (s *Server) makeConnection(instance Instance) CacheServiceClient {
 	log.Printf("makeConnection to instance %s:%d", instance.Ip, instance.Port)
-	cert, err := loadTLSCredentials()
+	cert, err := LoadTLSCredentials()
 	var conn *grpc.ClientConn
 	addr := fmt.Sprintf("%s:%d", instance.Ip, instance.Port)
 	conn, err = grpc.Dial(addr, grpc.WithTransportCredentials(cert))
