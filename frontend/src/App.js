@@ -8,14 +8,14 @@ const STATES = {
   'register': 1,
   'login': 2,
   'dashboard': 3,
-}
+};
 
 const NOTE_STATE = {
   'none': 0,
   'show': 1,
   'edit': 2,
   'post': 3,
-}
+};
 
 function Register({updateState}) {
   console.log("Register");
@@ -27,8 +27,9 @@ function Register({updateState}) {
     if (success) {
       // toast
       console.log("ثبت نام با موفقیت انجام شد.");
+      updateState(x => (STATES.login));
     } else {
-      console.log("مشکلی در ثبت نام شما پیش آمد.");
+      console.log("مشکلی در ثبت نام شما پیش آمد. دوباره تلاش کنید.");
     }
   };
   return (
@@ -49,6 +50,14 @@ function Login({updateState}) {
   const login_request = () => {
     console.log("Sending login request to server...");
     // TODO: send login to server
+    let success = true;
+    if (success) {
+      // toast
+      console.log("ورودت موفقیت‌آمیز بود عزیزم!");
+      updateState(x => (STATES.dashboard));
+    } else {
+      console.log("مشکلی در ورود شما پیش آمد. دوباره تلاش کنید.");
+    }
   };
   const go_to_register = () => {
     // change state to registery
@@ -102,9 +111,10 @@ function Dashboard({updateState}) {
   /// ListOfNotes
   /// ShowNote if a note selected
   /// EditOrPostNote if edit or post note
-  const [noteId, updateNoteId] =  useState(null);
-  const [noteState, updateNoteState] = useState(NOTE_STATE.none)
+  const [noteId, updateNoteId] = useState(null);
+  const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const onSend = () => {};
+  const log_out = () => {};
   return (
     <>
       {
@@ -122,6 +132,7 @@ function Dashboard({updateState}) {
           updateNoteState={updateNoteState}
         />
       }
+      <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
     </>
   )
 }
