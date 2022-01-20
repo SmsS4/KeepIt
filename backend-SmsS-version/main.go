@@ -33,4 +33,5 @@ func main() {
 	log.Printf("Response put %s", response)
 	response = api.Get("key")
 	log.Printf("Response put %s", response)
+	api.Clear()
 }
