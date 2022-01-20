@@ -8,6 +8,7 @@ import (
 
 	"github.com/SmsS4/KeepIt/cache/ds"
 	"github.com/SmsS4/KeepIt/cache/utils"
+	"golang.org/x/sync/singleflight"
 	"google.golang.org/grpc"
 )
 
@@ -18,6 +19,8 @@ type Server struct {
 	checkAgain   bool
 	partionCache *ds.PartionCache
 }
+
+var requestGroup singleflight.Group
 
 func (s *Server) CheckActiveIp() bool {
 	log.Printf(
@@ -73,7 +76,7 @@ func (s *Server) UseOthers(key string, value string) {
 	log.Print(err)
 }
 
-func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
+func (s *Server) get(key *Key) (*Result, error) {
 	log.Printf("Get %s", key.Key)
 	if s.CheckActiveIp() {
 		log.Printf("Not active call: %s", s.activeIp)
@@ -93,6 +96,14 @@ func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
 		MissCache: miss,
 		ActiveIp:  "",
 	}, err
+}
+
+func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
+	v, err, shared := requestGroup.Do("github", func() (interface{}, error) {
+		return s.get(key)
+	})
+	log.Printf("Shared Get %v", shared)
+	return v.(*Result), err
 }
 
 func (s *Server) Put(ctx context.Context, keyValue *KeyValue) (*OprationResult, error) {

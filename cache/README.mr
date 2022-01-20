@@ -1,0 +1,8 @@
+to run caches use these three commands:
+
+```
+go build -o runner
+./runner config.yml
+./runner config-2.yml
+./runner config-3.yml
+```
