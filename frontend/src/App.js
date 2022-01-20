@@ -1,5 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
+import { Form, Input, Button, Checkbox, Card, Spin, message } from 'antd';
 import {useState} from 'react'
 /// use toast for error handeling
 
@@ -17,14 +18,31 @@ const NOTE_STATE = {
 }
 
 function Register() {
-  /// username
-  /// password
+  console.log("Register");
+  
+  const register_request = () => {
+    console.log("Sending register request to server...")
+    // TODO: send request to server
+  };
+  return (
+    <>
+      <div dir="rtl">سلام. لطفا ثبت نام کنید.</div>
+      <Input placeholder="Username" />
+      <Input placeholder="Password" />
+      <Button type="primary" onClick={register_request}>ثبت نام</Button>
+    </>
+  )
 }
 
 function Login() {
   /// username
   /// password
   /// link to go to register
+  return (
+    <>
+
+    </>
+  )
 }
 
 function ListOfNotes({updateNoteId, updateNoteState}) {
@@ -32,6 +50,11 @@ function ListOfNotes({updateNoteId, updateNoteState}) {
   /// delete button ?
   /// edit button ?
   /// show button
+  return (
+    <>
+      
+    </>
+  )
 }
 
 function ShowNote({noteId, noteState}) {
@@ -39,11 +62,21 @@ function ShowNote({noteId, noteState}) {
   /// close button
   /// delete button ?
   /// edit button ?
+  return (
+    <>
+      
+    </>
+  )
 }
 
 function EditOrPostNote({onSend}) {
   /// component for editing or posting note
   /// send button
+  return (
+    <>
+      
+    </>
+  )
 }
 
 function Dashboard() {
@@ -61,9 +94,9 @@ function Dashboard() {
           updateNoteState={updateNoteState}
         />
       }
-      {noteState == NOTE_STATE.show && <ShowNote noteId={noteId}  noteState={noteState} updateNoteState={updateNoteState}/>}
+      {noteState === NOTE_STATE.show && <ShowNote noteId={noteId}  noteState={noteState} updateNoteState={updateNoteState}/>}
       {
-        (noteState == NOTE_STATE.edit || noteState == NOTE_STATE.post) &&
+        (noteState === NOTE_STATE.edit || noteState === NOTE_STATE.post) &&
         <EditOrPostNote 
           noteId={noteId}
           noteState={noteState}
@@ -76,12 +109,13 @@ function Dashboard() {
 
 
 function App() {
-  const [state, updateState] = useState(STATES.login);
+  const [state, updateState] = useState(1);
+
   return (
     <>
-      {state == STATES.login && <Login />}
-      {state == STATES.register && <Register />}
-      {state == STATES.dashboard && <Dashboard />}
+      {state === STATES.login && <Login />}
+      {state === STATES.register && <Register />}
+      {state === STATES.dashboard && <Dashboard />}
     </>
   );
 }
