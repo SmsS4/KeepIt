@@ -15,3 +15,30 @@ services:
         POSTGRES_PASSWORD: db_admin
       ports:
         - 5432:5432
+  # primary:
+  #   build:
+  #     network: host
+  #     context: ./
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "7000:7000"
+  #   command: "/app/cache_runner config.yml"
+  # secondary:
+  #   build:
+  #     network: host
+  #     context: ./
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "7001:7001"
+  #   command: "/app/cache_runner config-2.yml"
+  # tertiary:
+  #   build:
+  #     network: host
+  #     context: ./
+  #   depends_on:
+  #     - postgres
+  #   ports:
+  #     - "7002:7002"
+  #   command: "/app/cache_runner config-3.yml"

@@ -1,0 +1,13 @@
+db:
+  host: postgres
+  username: db_admin
+  password: db_admin
+  name: db_admin
+  port: "5432"
+cache:
+  max_size: 10
+  partions_count: 100
+api:
+  ip: 127.0.0.1
+  port: 7002
+  instances: "127.0.0.1:7000:0,127.0.0.1:7001:1,127.0.0.1:7002:2"

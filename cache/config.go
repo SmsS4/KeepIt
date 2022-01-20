@@ -20,7 +20,7 @@ type Config struct {
 
 func getConfig(configPath string) Config {
 	log.Print("Get config")
-	configFile, err := ioutil.ReadFile("config.yml")
+	configFile, err := ioutil.ReadFile(configPath)
 	utils.CheckError(err)
 	configMap := make(map[string]map[string]string)
 	utils.CheckError(yaml.Unmarshal(configFile, &configMap))

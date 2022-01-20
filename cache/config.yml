@@ -1,12 +1,12 @@
 db:
-  host: localhost
+  host: postgres
   username: db_admin
   password: db_admin
   name: db_admin
   port: "5432"
 cache:
-  max_size: 3
-  partions_count: 3
+  max_size: 10
+  partions_count: 100
 api:
   ip: 127.0.0.1
   port: 7000
