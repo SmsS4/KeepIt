@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"sort"
 	"strconv"
@@ -21,13 +22,13 @@ type ApiConfig struct {
 	Instances []Instance
 }
 
-func GetApiConfig(configMap map[string]string) ApiConfig {
-	log.Print("Getting api config")
-	port, err := strconv.Atoi(configMap["port"])
-	utils.CheckError(err)
-	instancesStrings := strings.Split(configMap["instances"], ",")
+func (instance *Instance) GetUrl() string {
+	return fmt.Sprintf("%s:%d", instance.Ip, instance.Port)
+}
+
+func ParseInsances(data string) []Instance {
+	instancesStrings := strings.Split(data, ",")
 	instances := make([]Instance, len(instancesStrings))
-	log.Printf("Got api config, port: %d", port)
 	for i := 0; i < len(instancesStrings); i++ {
 		ipAndPort := strings.Split(instancesStrings[i], ":")
 		ip := ipAndPort[0]
@@ -45,6 +46,15 @@ func GetApiConfig(configMap map[string]string) ApiConfig {
 	sort.Slice(instances, func(i, j int) bool {
 		return instances[i].Priority < instances[j].Priority
 	})
+	return instances
+}
+
+func GetApiConfig(configMap map[string]string) ApiConfig {
+	log.Print("Getting api config")
+	port, err := strconv.Atoi(configMap["port"])
+	utils.CheckError(err)
+	log.Printf("Got api config, port: %d", port)
+	instances := ParseInsances(configMap["instances"])
 	for i := 1; i < len(instances); i++ {
 		if instances[i].Priority == instances[i-1].Priority {
 			log.Fatalf(

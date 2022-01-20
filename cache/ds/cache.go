@@ -65,13 +65,15 @@ func (cache *Cache) Get(key string) (string, bool, error) {
 		log.Printf("Get %s from cache", key)
 		cache.linkList.MoveToTail(node)
 		cache.lock.Unlock()
-		return node.Value.Value, true, nil
+		return node.Value.Value, false, nil
 	} else {
 		log.Printf("Get %s from db", key)
 		value, err := cache.db.GetValue(key)
-		cache.addToMap(value.Key, value.Value)
+		if err == nil {
+			cache.addToMap(value.Key, value.Value)
+		}
 		cache.lock.Unlock()
-		return value.Value, false, err
+		return value.Value, true, err
 	}
 }
 
