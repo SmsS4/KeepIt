@@ -60,12 +60,10 @@ func (api *CacheApi) findConnection() string {
 	return ""
 }
 
-func (api *CacheApi) FindNewActive(activeIp string, err error) {
+func (api *CacheApi) FindNewActive(err error) {
 	st := status.Convert(err)
 	if st.Code() == codes.Unavailable {
 		api.currentInstance = api.findConnection()
-	} else if st.Code() == codes.Aborted && activeIp != "" {
-		api.currentInstance = activeIp
 	} else {
 		log.Fatalf("Error %s", err)
 	}
@@ -85,11 +83,11 @@ func (api *CacheApi) Get(key string) *server.Result {
 	)
 	log.Printf("Get response %s", response)
 	if err != nil {
-		if response != nil {
-			api.FindNewActive(response.ActiveIp, err)
-		} else {
-			api.FindNewActive("", err)
-		}
+		api.FindNewActive(err)
+		return api.Get(key)
+	}
+	if response.ActiveIp != "" {
+		api.currentInstance = response.ActiveIp
 		return api.Get(key)
 	}
 	return response
@@ -109,11 +107,11 @@ func (api *CacheApi) Put(key string, value string) *server.OprationResult {
 	)
 	log.Printf("Put response %s", response)
 	if err != nil {
-		if response != nil {
-			api.FindNewActive(response.ActiveIp, err)
-		} else {
-			api.FindNewActive("", err)
-		}
+		api.FindNewActive(err)
+		return api.Put(key, value)
+	}
+	if response.ActiveIp != "" {
+		api.currentInstance = response.ActiveIp
 		return api.Put(key, value)
 	}
 	return response
@@ -130,12 +128,13 @@ func (api *CacheApi) Clear() *server.OprationResult {
 	)
 	log.Printf("Clear response %s", response)
 	if err != nil {
-		if response != nil {
-			api.FindNewActive(response.ActiveIp, err)
-		} else {
-			api.FindNewActive("", err)
-		}
+		api.FindNewActive(err)
 		return api.Clear()
 	}
+	if response.ActiveIp != "" {
+		api.currentInstance = response.ActiveIp
+		return api.Clear()
+	}
+
 	return response
 }
