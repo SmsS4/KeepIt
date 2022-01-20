@@ -11,7 +11,6 @@ import (
 
 func main() {
 	server.RunApi()
-
 	log.Print("Starting server...")
 	log.Printf("Path is %s", os.Args[1])
 	config := getConfig(os.Args[1])

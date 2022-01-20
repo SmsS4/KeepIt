@@ -2,7 +2,10 @@ package server
 
 import (
 	context "context"
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 
@@ -10,6 +13,7 @@ import (
 	"github.com/SmsS4/KeepIt/cache/utils"
 	"golang.org/x/sync/singleflight"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type Server struct {
@@ -143,6 +147,11 @@ func (s *Server) Clear(ctx context.Context, _ *Nil) (*OprationResult, error) {
 	}, nil
 }
 
+// func (*Server) SayHello(ctx context.Context, in *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
+// 	log.Printf("method=SayHello name=%s", in.GetName())
+// 	return &helloworld.HelloReply{Message: "Hello " + in.GetName()}, nil
+// }
+
 func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 	log.Printf("Starting server on port %d", apiConfig.Port)
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", apiConfig.Port))
@@ -155,18 +164,43 @@ func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 		myIp:         fmt.Sprintf("%s:%d", apiConfig.Ip, apiConfig.Port),
 		config:       apiConfig,
 	}
-	grpcServer := grpc.NewServer()
+	cert, err := tls.LoadX509KeyPair("cert/server-cert.pem", "cert/server-key.pem")
+	opts := []grpc.ServerOption{
+		grpc.Creds(credentials.NewServerTLSFromCert(&cert)),
+	}
+
+	if err != nil {
+		log.Fatal("cannot load TLS credentials: ", err)
+	}
+
+	grpcServer := grpc.NewServer(opts...)
 	RegisterCacheServiceServer(grpcServer, &gatewayServer)
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server over port %d: %v", apiConfig.Port, err)
 	}
 }
 
+func loadTLSCredentials() (credentials.TransportCredentials, error) {
+	pemServerCA, err := ioutil.ReadFile("cert/ca-cert.pem")
+	if err != nil {
+		return nil, err
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+	config := &tls.Config{
+		RootCAs: certPool,
+	}
+	return credentials.NewTLS(config), nil
+}
+
 func (s *Server) makeConnection(instance Instance) CacheServiceClient {
 	log.Printf("makeConnection to instance %s:%d", instance.Ip, instance.Port)
+	cert, err := loadTLSCredentials()
 	var conn *grpc.ClientConn
 	addr := fmt.Sprintf("%s:%d", instance.Ip, instance.Port)
-	conn, err := grpc.Dial(addr, grpc.WithInsecure())
+	conn, err = grpc.Dial(addr, grpc.WithTransportCredentials(cert))
 	if err != nil {
 		log.Fatalf("could not makeConnection: %s", err)
 	}

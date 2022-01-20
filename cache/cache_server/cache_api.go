@@ -8,8 +8,10 @@ import (
 )
 
 func RunApi() {
+
 	var conn *grpc.ClientConn
-	conn, err := grpc.Dial(":7000", grpc.WithInsecure())
+	cert, err := loadTLSCredentials()
+	conn, err = grpc.Dial(":7000", grpc.WithTransportCredentials(cert))
 	if err != nil {
 		log.Fatalf("could not connect: %s", err)
 	}
@@ -49,10 +51,10 @@ func RunApi() {
 	key := Key{
 		Key: "Exists",
 	}
-	go c.Get(context.Background(), &key)
-	go c.Get(context.Background(), &key)
-	go c.Get(context.Background(), &key)
-	go c.Get(context.Background(), &key)
+	// go c.Get(context.Background(), &key)
+	// go c.Get(context.Background(), &key)
+	// go c.Get(context.Background(), &key)
+	// go c.Get(context.Background(), &key)
 	response, err := c.Get(context.Background(), &key)
 	if err != nil {
 		log.Fatalf("Error when calling SayHello: %s", err)
