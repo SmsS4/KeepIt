@@ -17,12 +17,19 @@ const NOTE_STATE = {
   'post': 3,
 }
 
-function Register() {
+function Register({updateState}) {
   console.log("Register");
   
   const register_request = () => {
     console.log("Sending register request to server...");
     // TODO: send request to server
+    let success = true;
+    if (success) {
+      // toast
+      console.log("ثبت نام با موفقیت انجام شد.");
+    } else {
+      console.log("مشکلی در ثبت نام شما پیش آمد.");
+    }
   };
   return (
     <>
@@ -35,7 +42,7 @@ function Register() {
   )
 }
 
-function Login() {
+function Login({updateState}) {
   /// username
   /// password
   /// link to go to register
@@ -45,6 +52,7 @@ function Login() {
   };
   const go_to_register = () => {
     // change state to registery
+    updateState(x => (STATES.register));
   };
   return (
     <>
@@ -90,7 +98,7 @@ function EditOrPostNote({onSend}) {
   )
 }
 
-function Dashboard() {
+function Dashboard({updateState}) {
   /// ListOfNotes
   /// ShowNote if a note selected
   /// EditOrPostNote if edit or post note
@@ -124,9 +132,9 @@ function App() {
 
   return (
     <>
-      {state === STATES.login && <Login />}
-      {state === STATES.register && <Register />}
-      {state === STATES.dashboard && <Dashboard />}
+      {state === STATES.login && <Login updateState={updateState} />}
+      {state === STATES.register && <Register updateState={updateState} />}
+      {state === STATES.dashboard && <Dashboard updateState={updateState} />}
     </>
   );
 }
