@@ -56,7 +56,7 @@ function Login({updateState}) {
       console.log("ورودت موفقیت‌آمیز بود عزیزم!");
       updateState(x => (STATES.dashboard));
     } else {
-      console.log("مشکلی در ورود شما پیش آمد. دوباره تلاش کنید.");
+      console.log("مشکلی در ورودت پیش اومد. دوباره تلاش کن.");
     }
   };
   const go_to_register = () => {
@@ -114,7 +114,18 @@ function Dashboard({updateState}) {
   const [noteId, updateNoteId] = useState(null);
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const onSend = () => {};
-  const log_out = () => {};
+  const log_out = () => {
+    console.log("send log out request to server...");
+    // TODO: send log out request to server
+    let success = true;
+    if (success) {
+      // toast
+      console.log("خروجت موفقیت‌آمیز بود عزیزم!");
+      updateState(x => (STATES.login));
+    } else {
+      console.log("مشکلی در خروجت پیش اومد. دوباره تلاش کن.");
+    }
+  };
   return (
     <>
       {
