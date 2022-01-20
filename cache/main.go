@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	server.RunApi()
+	// server.RunApi()
 
 	log.Print("Starting server...")
 	log.Printf("Path is %s", os.Args[1])
