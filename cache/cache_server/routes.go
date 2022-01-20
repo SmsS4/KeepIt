@@ -28,9 +28,9 @@ type Server struct {
 
 var requestGroup singleflight.Group
 
-func ChangeActiveIp() error {
-	return status.Error(codes.Aborted, "Change Active Ip")
-}
+// func ChangeActiveIp() error {
+// 	return status.Error(codes.Aborted, "Change Active Ip")
+// }
 
 func (s *Server) CheckActiveIp() bool {
 	log.Printf(
@@ -94,7 +94,7 @@ func (s *Server) get(key *Key) (*Result, error) {
 			Value:     "",
 			MissCache: false,
 			ActiveIp:  s.activeIp,
-		}, ChangeActiveIp()
+		}, nil
 	}
 	value, miss, err := s.partionCache.Get(key.Key)
 	if err == nil {
@@ -122,7 +122,7 @@ func (s *Server) Put(ctx context.Context, keyValue *KeyValue) (*OprationResult, 
 		log.Printf("Not active call %s", s.activeIp)
 		return &OprationResult{
 			ActiveIp: s.activeIp,
-		}, ChangeActiveIp()
+		}, nil
 	}
 	s.partionCache.Put(keyValue.Key, keyValue.Value)
 	s.UseOthers(keyValue.Key, keyValue.Value)
@@ -138,7 +138,7 @@ func (s *Server) Clear(ctx context.Context, _ *Nil) (*OprationResult, error) {
 		log.Printf("Not active call %s", s.activeIp)
 		return &OprationResult{
 			ActiveIp: s.activeIp,
-		}, ChangeActiveIp()
+		}, nil
 	}
 	log.Print("Clear all partions")
 	s.partionCache.ClearAll(true)
@@ -181,9 +181,15 @@ func RunServer(apiConfig ApiConfig, partionCache *ds.PartionCache) {
 
 	grpcServer := grpc.NewServer(opts...)
 	RegisterCacheServiceServer(grpcServer, &gatewayServer)
+	gatewayServer.ImAlive(context.Background(), &Data{
+		FromIp:     gatewayServer.config.Ip,
+		FromPort:   int32(gatewayServer.config.Port),
+		Distribute: true,
+	})
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve gRPC server over port %d: %v", apiConfig.Port, err)
 	}
+
 }
 
 func LoadTLSCredentials() (credentials.TransportCredentials, error) {
@@ -235,7 +241,11 @@ func (s *Server) Use(ctx context.Context, keyValue *DistKeyValue) (*Nil, error) 
 				)
 				conn := s.makeConnection(instance)
 				_, err := conn.Use(context.Background(), keyValue)
-				utils.CheckError(err)
+				if err != nil && status.Convert(err).Code() == codes.Unavailable {
+					log.Printf("%s is unavalile", instance.GetUrl())
+				} else {
+					utils.CheckError(err)
+				}
 			}
 		}
 	}
@@ -261,7 +271,11 @@ func (s *Server) ClearDist(ctx context.Context, data *Data) (*Nil, error) {
 				)
 				conn := s.makeConnection(instance)
 				_, err := conn.ClearDist(context.Background(), data)
-				utils.CheckError(err)
+				if err != nil && status.Convert(err).Code() == codes.Unavailable {
+					log.Printf("%s is unavalile", instance.GetUrl())
+				} else {
+					utils.CheckError(err)
+				}
 			}
 		}
 	}
@@ -291,7 +305,11 @@ func (s *Server) ImAlive(ctx context.Context, data *Data) (*Nil, error) {
 				)
 				conn := s.makeConnection(instance)
 				_, err := conn.ImAlive(context.Background(), data)
-				utils.CheckError(err)
+				if err != nil && status.Convert(err).Code() == codes.Unavailable {
+					log.Printf("%s is unavalile", instance.GetUrl())
+				} else {
+					utils.CheckError(err)
+				}
 			}
 		}
 	}

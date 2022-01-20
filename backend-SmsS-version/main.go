@@ -28,9 +28,13 @@ func getConfig(configPath string) Config {
 func main() {
 	config := getConfig(os.Args[1])
 	api := cache_api.CreateApi(config.CacheApi)
-	api.Put("key", "value")
-	response := api.Get("key")
-	log.Printf("Response put %s", response)
-	response = api.Get("key")
-	log.Printf("Response put %s", response)
+	for {
+		api.Put("key", "value")
+		response := api.Get("key")
+		log.Printf("Response put %s", response)
+		response = api.Get("key")
+		log.Printf("Response put %s", response)
+		api.Clear()
+	}
+
 }
