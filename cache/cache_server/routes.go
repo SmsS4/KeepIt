@@ -13,7 +13,9 @@ import (
 	"github.com/SmsS4/KeepIt/cache/utils"
 	"golang.org/x/sync/singleflight"
 	"google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
+	status "google.golang.org/grpc/status"
 )
 
 type Server struct {
@@ -25,6 +27,10 @@ type Server struct {
 }
 
 var requestGroup singleflight.Group
+
+func ChangeActiveIp() error {
+	return status.Error(codes.Aborted, "Change Active Ip")
+}
 
 func (s *Server) CheckActiveIp() bool {
 	log.Printf(
@@ -88,7 +94,7 @@ func (s *Server) get(key *Key) (*Result, error) {
 			Value:     "",
 			MissCache: false,
 			ActiveIp:  s.activeIp,
-		}, nil
+		}, ChangeActiveIp()
 	}
 	value, miss, err := s.partionCache.Get(key.Key)
 	if err == nil {
@@ -116,7 +122,7 @@ func (s *Server) Put(ctx context.Context, keyValue *KeyValue) (*OprationResult, 
 		log.Printf("Not active call %s", s.activeIp)
 		return &OprationResult{
 			ActiveIp: s.activeIp,
-		}, nil
+		}, ChangeActiveIp()
 	}
 	s.partionCache.Put(keyValue.Key, keyValue.Value)
 	s.UseOthers(keyValue.Key, keyValue.Value)
@@ -132,7 +138,7 @@ func (s *Server) Clear(ctx context.Context, _ *Nil) (*OprationResult, error) {
 		log.Printf("Not active call %s", s.activeIp)
 		return &OprationResult{
 			ActiveIp: s.activeIp,
-		}, nil
+		}, ChangeActiveIp()
 	}
 	log.Print("Clear all partions")
 	s.partionCache.ClearAll(true)
