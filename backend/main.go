@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -18,8 +17,14 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+type GatewayConfig struct {
+	Port               string
+	RateLimitPerMinute int
+}
+
 type Config struct {
-	CacheApi cache_api.CacheConfig
+	CacheApi      cache_api.CacheConfig
+	GatewayConfig GatewayConfig
 }
 
 var (
@@ -44,35 +49,6 @@ func GenerateId() string {
 	res := strconv.Itoa(rand.Intn(99999999-10000000) + 10000000)
 	return res
 }
-func GetNote(c *gin.Context, kash *cache_api.CacheApi) {
-	note_id := c.Query("note_id")
-	auth := c.Request.Header.Get("Authorization")
-	if auth == "" {
-		c.String(400, "please register and login first")
-		c.Abort()
-		return
-	}
-	token := strings.TrimPrefix(auth, "Bearer ")
-	username := ParseToken(token)
-
-	if username != strings.Split(note_id, "$")[0] && username != "admin" {
-		c.JSON(400, gin.H{"error": "you are not authorized to read the note"})
-		return
-	}
-	if kash.Get(note_id) == "" {
-		c.JSON(400, gin.H{"error": "note doesn't exist"})
-		return
-	}
-	c.JSON(200, gin.H{"note": kash.Get(note_id)})
-}
-
-func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
-	v, err, shared := requestGroup.Do("github", func() (interface{}, error) {
-		return s.get(key)
-	})
-	log.Printf("Shared Get %v", shared)
-	return v.(*Result), err
-}
 
 func ParseToken(tokenStr string) string {
 
@@ -85,6 +61,15 @@ func ParseToken(tokenStr string) string {
 	return username
 }
 
+func getGatewayConfig(data map[string]string) GatewayConfig {
+	port, err := strconv.Atoi(data["ratelimit-per-minute"])
+	utils.CheckError(err)
+	return GatewayConfig{
+		Port:               data["port"],
+		RateLimitPerMinute: port,
+	}
+}
+
 func getConfig(configPath string) Config {
 	log.Print("Getting config")
 	configFile, err := ioutil.ReadFile(configPath)
@@ -92,13 +77,36 @@ func getConfig(configPath string) Config {
 	configMap := make(map[string]map[string]string)
 	utils.CheckError(yaml.Unmarshal(configFile, &configMap))
 	return Config{
-		CacheApi: cache_api.GetCacheConfig(configMap["cache"]),
+		CacheApi:      cache_api.GetCacheConfig(configMap["cache"]),
+		GatewayConfig: getGatewayConfig(configMap["gateway"]),
 	}
 }
 
-func main() {
+var rateLimit = make(map[string][]int64)
+var config = getConfig(os.Args[1])
 
-	config := getConfig(os.Args[1])
+func relaxRatelimit(requests []int64) {
+	timestamp := time.Now().Unix()
+	for len(requests) > 0 {
+		if (timestamp - requests[0]) > 60 {
+			requests = requests[1:]
+		}
+	}
+}
+
+func checkRatelimit(username string) bool {
+	if _, ok := rateLimit[username]; !ok {
+		rateLimit[username] = make([]int64, 0)
+	}
+	relaxRatelimit(rateLimit[username])
+	if len(rateLimit[username]) > config.GatewayConfig.RateLimitPerMinute {
+		return false
+	}
+	rateLimit[username] = append(rateLimit[username], time.Now().Unix())
+	return true
+}
+
+func main() {
 	kash := cache_api.CreateApi(config.CacheApi)
 	r := gin.Default()
 	public := r.Group("/pub")
@@ -181,6 +189,10 @@ func main() {
 
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
+		if !checkRatelimit(username) {
+			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+			return
+		}
 		note_id := username + "$" + GenerateId()
 		kash.Put(note_id, input.Note)
 		c.JSON(500, gin.H{"note_id": note_id})
@@ -201,7 +213,10 @@ func main() {
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-
+		if !checkRatelimit(username) {
+			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+			return
+		}
 		if username != strings.Split(input.Note_id, "$")[0] && username != "admin" {
 			c.JSON(400, gin.H{"error": "you are not authorized to uppdate note"})
 			return
@@ -222,7 +237,28 @@ func main() {
 	})
 
 	private.GET("/get_note", func(c *gin.Context) {
-		GetNote(c, kash)
+		noteId := c.Query("note_id")
+		auth := c.Request.Header.Get("Authorization")
+		if auth == "" {
+			c.String(400, "please register and login first")
+			c.Abort()
+			return
+		}
+		token := strings.TrimPrefix(auth, "Bearer ")
+		username := ParseToken(token)
+		if !checkRatelimit(username) {
+			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+			return
+		}
+		if username != strings.Split(noteId, "$")[0] && username != "admin" {
+			c.JSON(400, gin.H{"error": "You are not authorized to read the note"})
+			return
+		}
+		if kash.Get(noteId) == "" {
+			c.JSON(400, gin.H{"error": "Note doesn't exist"})
+			return
+		}
+		c.JSON(200, gin.H{"note": kash.Get(noteId)})
 	})
 
 	private.DELETE("/delete_note", func(c *gin.Context) {
@@ -235,7 +271,10 @@ func main() {
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-
+		if !checkRatelimit(username) {
+			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+			return
+		}
 		if username != strings.Split(note_id, "$")[0] && username != "admin" {
 			c.JSON(400, gin.H{"error": "you are not authorized to delete note"})
 			return
@@ -248,5 +287,5 @@ func main() {
 		c.JSON(200, gin.H{"message": "note deleted successfully"})
 	})
 
-	r.Run("localhost:" + os.Args[2])
+	r.Run("localhost:" + config.GatewayConfig.Port)
 }
