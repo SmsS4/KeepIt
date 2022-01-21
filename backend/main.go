@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -42,6 +43,35 @@ type UpdateNoteInput struct {
 func GenerateId() string {
 	res := strconv.Itoa(rand.Intn(99999999-10000000) + 10000000)
 	return res
+}
+func GetNote(c *gin.Context, kash *cache_api.CacheApi) {
+	note_id := c.Query("note_id")
+	auth := c.Request.Header.Get("Authorization")
+	if auth == "" {
+		c.String(400, "please register and login first")
+		c.Abort()
+		return
+	}
+	token := strings.TrimPrefix(auth, "Bearer ")
+	username := ParseToken(token)
+
+	if username != strings.Split(note_id, "$")[0] && username != "admin" {
+		c.JSON(400, gin.H{"error": "you are not authorized to read the note"})
+		return
+	}
+	if kash.Get(note_id) == "" {
+		c.JSON(400, gin.H{"error": "note doesn't exist"})
+		return
+	}
+	c.JSON(200, gin.H{"note": kash.Get(note_id)})
+}
+
+func (s *Server) Get(ctx context.Context, key *Key) (*Result, error) {
+	v, err, shared := requestGroup.Do("github", func() (interface{}, error) {
+		return s.get(key)
+	})
+	log.Printf("Shared Get %v", shared)
+	return v.(*Result), err
 }
 
 func ParseToken(tokenStr string) string {
@@ -137,17 +167,18 @@ func main() {
 			return
 		}
 
+		auth := c.Request.Header.Get("Authorization")
+		if auth == "" {
+			c.String(400, "please register and login first")
+			c.Abort()
+			return
+		}
+
 		if len(input.Note) == 0 || len(input.Note) > 2048 {
 			c.JSON(400, gin.H{"error": "note length error"})
 			return
 		}
 
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.String(400, "No Authorization header provided")
-			c.Abort()
-			return
-		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
 		note_id := username + "$" + GenerateId()
@@ -164,7 +195,7 @@ func main() {
 
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
-			c.String(400, "No Authorization header provided")
+			c.String(400, "please register and login first")
 			c.Abort()
 			return
 		}
@@ -191,35 +222,14 @@ func main() {
 	})
 
 	private.GET("/get_note", func(c *gin.Context) {
-		note_id := c.Query("note_id")
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.String(400, "No Authorization header provided")
-			c.Abort()
-			return
-		}
-		token := strings.TrimPrefix(auth, "Bearer ")
-		username := ParseToken(token)
-
-		if username != strings.Split(note_id, "$")[0] && username != "admin" {
-			c.JSON(400, gin.H{"error": "you are not authorized to read the note",
-				"user": username,
-				"id":   note_id,
-			})
-			return
-		}
-		if kash.Get(note_id) == "" {
-			c.JSON(400, gin.H{"error": "note doesn't exist"})
-			return
-		}
-		c.JSON(200, gin.H{"note": kash.Get(note_id)})
+		GetNote(c, kash)
 	})
 
 	private.DELETE("/delete_note", func(c *gin.Context) {
 		note_id := c.Query("note_id")
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
-			c.String(400, "No Authorization header provided")
+			c.String(400, "please register and login first")
 			c.Abort()
 			return
 		}
@@ -238,6 +248,5 @@ func main() {
 		c.JSON(200, gin.H{"message": "note deleted successfully"})
 	})
 
-	r.Run("localhost:8080")
-
+	r.Run("localhost:" + os.Args[2])
 }
