@@ -8,11 +8,11 @@ services:
   postgres:
       image: postgres
       volumes:
-        - postgres_data:/var/lib/postgresql/data
+        - postgres_data:/var/lib/postgresql/data2
       environment:
-        POSTGRES_DB: db_admin
-        POSTGRES_USER: db_admin
-        POSTGRES_PASSWORD: db_admin
+        POSTGRES_DB: db
+        POSTGRES_USER: db
+        POSTGRES_PASSWORD: db
       ports:
         - 5432:5432
   # primary:
