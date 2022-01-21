@@ -2,12 +2,17 @@ package cache_api
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"io/ioutil"
 	"log"
 
 	server "github.com/SmsS4/KeepIt/cache/cache_server"
 	"github.com/SmsS4/KeepIt/cache/utils"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -24,10 +29,25 @@ func CreateApi(config CacheConfig) *CacheApi {
 	return api
 }
 
+func LoadTLSCredentials() (credentials.TransportCredentials, error) {
+	pemServerCA, err := ioutil.ReadFile("cert/ca-cert.pem")
+	if err != nil {
+		return nil, err
+	}
+	certPool := x509.NewCertPool()
+	if !certPool.AppendCertsFromPEM(pemServerCA) {
+		return nil, fmt.Errorf("failed to add server CA's certificate")
+	}
+	config := &tls.Config{
+		RootCAs: certPool,
+	}
+	return credentials.NewTLS(config), nil
+}
+
 func (api *CacheApi) createConnection(url string) (server.CacheServiceClient, error) {
 	log.Printf("Create connection to %s", url)
 	var conn *grpc.ClientConn
-	cert, err := server.LoadTLSCredentials()
+	cert, err := LoadTLSCredentials()
 	utils.CheckError(err)
 	conn, err = grpc.Dial(
 		url,
