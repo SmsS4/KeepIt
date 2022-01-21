@@ -46,6 +46,7 @@ func (cache *Cache) addToMap(key string, value string) {
 func (cache *Cache) Touch(key string, value string) {
 	cache.lock.Lock()
 	if node, ok := cache.keyToNode[key]; ok {
+		node.Value = Pair{key, value}
 		cache.linkList.MoveToTail(node)
 	} else {
 		cache.addToMap(key, value)
