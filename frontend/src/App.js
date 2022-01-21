@@ -20,8 +20,6 @@ const STATES = {
 const NOTE_STATE = {
   'none': 0,
   'show': 1,
-  'edit': 2,
-  'post': 3,
 };
 
 function Register({updateState}) {
@@ -78,21 +76,46 @@ function Login({updateState}) {
 }
 
 function ListOfNotes({updateNoteId, updateNoteState}) {
-  /// list of notes title
-  /// delete button ?
-  /// edit button ?
-  /// show button
-  // TODO:
-  const selectNote = () => {
-    
+  // new note button
+  const [notesList, updateNotesList] = useState([]);
+  const get_notes_list = () => {
+    // TODO: sending request to get list of notes
+    const notesListRes = [
+      {id: 1, title:"first title"},
+      {id: 123, title:"second"}
+    ];
+    updateNotesList(x => notesListRes);
   };
-  const deleteNote = () => {
 
+  const newNote = () => {
+    // TODO:
   };
+  const selectNote = (id) => {
+    // TODO:
+    console.log("select", id);
+  };
+  const deleteNote = (id) => {
+    // TODO: send delete request to server
+    console.log("delete", id);
+  };
+  
   return (
     <>
-      <Button type="primary" onClick={selectNote}>انتخاب</Button>
-      <Button type="primary" onClick={deleteNote}>پاک کردن</Button>
+      <Button type="primary" onClick={get_notes_list}>به‌روزرسانی فهرست</Button>
+      <div dir="rtl">فهرست یادداشت‌ها:</div>
+      <div>
+      {notesList.map(function(d, idx){
+        return (
+          <>
+            <div dir="rtl" key={idx}>
+              {d.title}
+              <Button type="primary" onClick={() => selectNote(d.id)}>انتخاب</Button>
+              <Button type="primary" onClick={() => deleteNote(d.id)}>پاک کردن</Button>
+            </div>
+          </>
+        )
+      })}
+      </div>
     </>
   )
 }
@@ -108,15 +131,6 @@ function ShowNote({noteId, noteState, updateNoteState}) {
   )
 }
 
-function EditOrPostNote({onSend, noteId, noteState, updateNoteState}) {
-  /// component for editing or posting note
-  /// send button
-  return (
-    <>
-      
-    </>
-  )
-}
 
 function Dashboard({updateState}) {
   /// ListOfNotes
@@ -125,17 +139,7 @@ function Dashboard({updateState}) {
   const [noteId, updateNoteId] = useState(null);
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const onSend = () => {};
-  const log_out = () => {
-    notify("send log out request to server...");
-    // TODO: send log out request to server
-    let success = true;
-    if (success) {
-      notify("خروجت موفقیت‌آمیز بود عزیزم!");
-      updateState(x => (STATES.login));
-    } else {
-      notify("مشکلی در خروجت پیش اومد. دوباره تلاش کن.");
-    }
-  };
+  const log_out = () => updateState(x => (STATES.login));
   return (
     <>
       {
@@ -145,15 +149,6 @@ function Dashboard({updateState}) {
         />
       }
       {noteState === NOTE_STATE.show && <ShowNote noteId={noteId}  noteState={noteState} updateNoteState={updateNoteState}/>}
-      {
-        (noteState === NOTE_STATE.edit || noteState === NOTE_STATE.post) &&
-        <EditOrPostNote 
-          noteId={noteId}
-          noteState={noteState}
-          updateNoteState={updateNoteState}
-          onSend={onSend}
-        />
-      }
       <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
     </>
   )
@@ -162,6 +157,7 @@ function Dashboard({updateState}) {
 
 function App() {
   const [state, updateState] = useState(STATES.login);
+  // TODO: token, updateToken
 
   return (
     <>
