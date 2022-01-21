@@ -3,9 +3,11 @@ import './App.css';
 import { Form, Input, Button, Checkbox, Card, Spin, message } from 'antd';
 import {useState} from 'react'
 
-import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+
+import ReactMarkdown from 'react-markdown'
+
 
 const notify = (msg) => toast(msg);
 
@@ -80,26 +82,33 @@ function ListOfNotes({updateNoteId, updateNoteState}) {
   /// delete button ?
   /// edit button ?
   /// show button
+  // TODO:
+  const selectNote = () => {
+    
+  };
+  const deleteNote = () => {
+
+  };
   return (
     <>
-      
+      <Button type="primary" onClick={selectNote}>انتخاب</Button>
+      <Button type="primary" onClick={deleteNote}>پاک کردن</Button>
     </>
   )
 }
 
-function ShowNote({noteId, noteState}) {
+function ShowNote({noteId, noteState, updateNoteState}) {
   /// markdown support
-  /// close button
-  /// delete button ?
-  /// edit button ?
+  /// save button
+  const test_str = "# Hello, *world*!";
   return (
     <>
-      
+      <ReactMarkdown>{test_str}</ReactMarkdown>
     </>
   )
 }
 
-function EditOrPostNote({onSend}) {
+function EditOrPostNote({onSend, noteId, noteState, updateNoteState}) {
   /// component for editing or posting note
   /// send button
   return (
@@ -142,6 +151,7 @@ function Dashboard({updateState}) {
           noteId={noteId}
           noteState={noteState}
           updateNoteState={updateNoteState}
+          onSend={onSend}
         />
       }
       <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
