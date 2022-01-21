@@ -8,6 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import ReactMarkdown from 'react-markdown'
 
+const { TextArea } = Input;
 
 const notify = (msg) => toast(msg);
 
@@ -123,10 +124,18 @@ function ListOfNotes({updateNoteId, updateNoteState}) {
 function ShowNote({noteId, noteState, updateNoteState}) {
   /// markdown support
   /// save button
-  const test_str = "# Hello, *world*!";
+  const [editorText, updateEditorText] = useState("# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***");
+  
+  const onChange = e => {
+    updateEditorText(x => e.target.value);
+  };
+
   return (
     <>
-      <ReactMarkdown>{test_str}</ReactMarkdown>
+      <TextArea showCount maxLength={1000} style={{ width: "90%", height: 250 }} onChange={onChange} defaultValue={editorText} />
+      <div style={{ width: "90%", height: 250 }}>
+        <ReactMarkdown>{editorText}</ReactMarkdown>
+      </div>
     </>
   )
 }
@@ -137,7 +146,7 @@ function Dashboard({updateState}) {
   /// ShowNote if a note selected
   /// EditOrPostNote if edit or post note
   const [noteId, updateNoteId] = useState(null);
-  const [noteState, updateNoteState] = useState(NOTE_STATE.none);
+  const [noteState, updateNoteState] = useState(NOTE_STATE.show);
   const onSend = () => {};
   const log_out = () => updateState(x => (STATES.login));
   return (
@@ -149,7 +158,9 @@ function Dashboard({updateState}) {
         />
       }
       {noteState === NOTE_STATE.show && <ShowNote noteId={noteId}  noteState={noteState} updateNoteState={updateNoteState}/>}
-      <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
+      <div>
+        <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
+      </div>
     </>
   )
 }
