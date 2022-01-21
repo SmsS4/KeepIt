@@ -2,7 +2,12 @@ import logo from './logo.svg';
 import './App.css';
 import { Form, Input, Button, Checkbox, Card, Spin, message } from 'antd';
 import {useState} from 'react'
-/// use toast for error handeling
+
+import React from 'react';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
+const notify = (msg) => toast(msg);
 
 const STATES = {
   'register': 1,
@@ -19,17 +24,15 @@ const NOTE_STATE = {
 
 function Register({updateState}) {
   console.log("Register");
-  
   const register_request = () => {
-    console.log("Sending register request to server...");
+    notify("Sending register request to server...");
     // TODO: send request to server
     let success = true;
     if (success) {
-      // toast
-      console.log("ثبت نام با موفقیت انجام شد.");
+      notify("ثبت نام با موفقیت انجام شد.");
       updateState(x => (STATES.login));
     } else {
-      console.log("مشکلی در ثبت نام شما پیش آمد. دوباره تلاش کنید.");
+      notify("مشکلی در ثبت نام شما پیش آمد. دوباره تلاش کنید.");
     }
   };
   return (
@@ -48,15 +51,14 @@ function Login({updateState}) {
   /// password
   /// link to go to register
   const login_request = () => {
-    console.log("Sending login request to server...");
+    notify("Sending login request to server...");
     // TODO: send login to server
     let success = true;
     if (success) {
-      // toast
-      console.log("ورودت موفقیت‌آمیز بود عزیزم!");
+      notify("ورودت موفقیت‌آمیز بود عزیزم!");
       updateState(x => (STATES.dashboard));
     } else {
-      console.log("مشکلی در ورودت پیش اومد. دوباره تلاش کن.");
+      notify("مشکلی در ورودت پیش اومد. دوباره تلاش کن.");
     }
   };
   const go_to_register = () => {
@@ -115,15 +117,14 @@ function Dashboard({updateState}) {
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const onSend = () => {};
   const log_out = () => {
-    console.log("send log out request to server...");
+    notify("send log out request to server...");
     // TODO: send log out request to server
     let success = true;
     if (success) {
-      // toast
-      console.log("خروجت موفقیت‌آمیز بود عزیزم!");
+      notify("خروجت موفقیت‌آمیز بود عزیزم!");
       updateState(x => (STATES.login));
     } else {
-      console.log("مشکلی در خروجت پیش اومد. دوباره تلاش کن.");
+      notify("مشکلی در خروجت پیش اومد. دوباره تلاش کن.");
     }
   };
   return (
@@ -157,6 +158,7 @@ function App() {
       {state === STATES.login && <Login updateState={updateState} />}
       {state === STATES.register && <Register updateState={updateState} />}
       {state === STATES.dashboard && <Dashboard updateState={updateState} />}
+      <ToastContainer />
     </>
   );
 }
