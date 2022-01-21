@@ -3,18 +3,18 @@ package main
 import (
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
-	"time"
 	"strconv"
 	"strings"
+	"time"
+
 	"github.com/SmsS4/KeepIt/backend/cache_api"
 	"github.com/SmsS4/KeepIt/cache/utils"
 	jwt_lib "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/jwt"
 	"github.com/gin-gonic/gin"
 	"gopkg.in/yaml.v2"
-	"math/rand"
-
 )
 
 type Config struct {
@@ -36,10 +36,10 @@ type NewNoteInput struct {
 
 type UpdateNoteInput struct {
 	Note_id string `json:"note_id" binding:"required"`
-	Note string `json:"note" binding:"required"`
+	Note    string `json:"note" binding:"required"`
 }
 
-func GenerateId() string{
+func GenerateId() string {
 	res := strconv.Itoa(rand.Intn(99999999-10000000) + 10000000)
 	return res
 }
@@ -50,13 +50,9 @@ func ParseToken(tokenStr string) string {
 	token, _ := jwt_lib.Parse(tokenStr, func(token *jwt_lib.Token) (interface{}, error) {
 		return mysupersecretpassword, nil
 	})
-
-	// extracting username
-	if claims, ok := token.Claims.(jwt_lib.MapClaims); ok && token.Valid {
-		username := claims["username"].(string)
-		return username
-	}
-	return ""
+	claims, _ := token.Claims.(jwt_lib.MapClaims)
+	username := claims["username"].(string)
+	return username
 }
 
 func getConfig(configPath string) Config {
@@ -72,7 +68,6 @@ func getConfig(configPath string) Config {
 
 func main() {
 
-
 	config := getConfig(os.Args[1])
 	kash := cache_api.CreateApi(config.CacheApi)
 	r := gin.Default()
@@ -84,8 +79,8 @@ func main() {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-		
-		if len(input.Username) == 0 || len(input.Username) > 55{
+
+		if len(input.Username) == 0 || len(input.Username) > 55 {
 			c.JSON(400, gin.H{"error": "username length error"})
 			return
 		}
@@ -121,8 +116,8 @@ func main() {
 		token := jwt_lib.New(jwt_lib.GetSigningMethod("HS256"))
 		// Set some claims
 		token.Claims = jwt_lib.MapClaims{
-			"username":  input.Username,
-			"exp": time.Now().Add(time.Hour * 1).Unix(),
+			"username": input.Username,
+			"exp":      time.Now().Add(time.Hour * 1).Unix(),
 		}
 		// Sign and get the complete encoded token as a string
 		tokenString, err := token.SignedString([]byte(mysupersecretpassword))
@@ -176,17 +171,17 @@ func main() {
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
 
-		if username != strings.Split(input.Note_id, "$")[0] && username != "admin"{
+		if username != strings.Split(input.Note_id, "$")[0] && username != "admin" {
 			c.JSON(400, gin.H{"error": "you are not authorized to uppdate note"})
 			return
 		}
 
-		if kash.Get(input.Note_id) == ""{
+		if kash.Get(input.Note_id) == "" {
 			c.JSON(400, gin.H{"error": "note doesnt exist"})
 			return
 		}
 
-		if len(input.Note) == 0 || len(input.Note) > 2048{
+		if len(input.Note) == 0 || len(input.Note) > 2048 {
 			c.JSON(400, gin.H{"error": "note length error"})
 			return
 		}
@@ -195,8 +190,8 @@ func main() {
 		c.JSON(200, gin.H{"message": "note changed succssessfully"})
 	})
 
-	private.GET("/get_note/:note_id", func(c *gin.Context) {
-		note_id := c.Param("note_id")
+	private.GET("/get_note", func(c *gin.Context) {
+		note_id := c.Query("note_id")
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
 			c.String(400, "No Authorization header provided")
@@ -206,19 +201,22 @@ func main() {
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
 
-		if username != strings.Split(note_id, "$")[0] && username != "admin"{
-			c.JSON(400, gin.H{"error": "you are not authorized to read note"})
+		if username != strings.Split(note_id, "$")[0] && username != "admin" {
+			c.JSON(400, gin.H{"error": "you are not authorized to read the note",
+				"user": username,
+				"id":   note_id,
+			})
 			return
 		}
-		if kash.Get(note_id) == ""{
+		if kash.Get(note_id) == "" {
 			c.JSON(400, gin.H{"error": "note doesn't exist"})
 			return
 		}
 		c.JSON(200, gin.H{"note": kash.Get(note_id)})
 	})
 
-	private.DELETE("/delete_note/:note_id", func(c *gin.Context) {
-		note_id := c.Param("note_id")
+	private.DELETE("/delete_note", func(c *gin.Context) {
+		note_id := c.Query("note_id")
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
 			c.String(400, "No Authorization header provided")
@@ -228,19 +226,18 @@ func main() {
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
 
-		if username != strings.Split(note_id, "$")[0] && username != "admin"{
+		if username != strings.Split(note_id, "$")[0] && username != "admin" {
 			c.JSON(400, gin.H{"error": "you are not authorized to delete note"})
 			return
 		}
-		if kash.Get(note_id) == ""{
+		if kash.Get(note_id) == "" {
 			c.JSON(400, gin.H{"error": "note doesn't exist"})
 			return
 		}
 		kash.Put(note_id, "")
-		c.JSON(200, gin.H{"message": "note deleted successfully")
+		c.JSON(200, gin.H{"message": "note deleted successfully"})
 	})
-	
-	r.Run("localhost:8080")
 
+	r.Run("localhost:8080")
 
 }
