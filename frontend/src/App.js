@@ -25,42 +25,37 @@ const NOTE_STATE = {
   'show': 1,
 };
 
+let counter = 50;
 
 
-function ListOfNotes({updateNoteId, updateNoteState}) {
-  // new note button
-  const [notesList, updateNotesList] = useState([]);
-  const get_notes_list = () => {
-    // TODO: sending request to get list of notes
-    const notesListRes = [
-      {id: 1, title:"first title"},
-      {id: 123, title:"second"}
-    ];
-    updateNotesList(x => notesListRes);
-  };
+function ListOfNotes({updateNoteId, updateNoteState, token}) {
+  const [notesList, updateNotesList] = useState([{id: 1}, {id: 123}]);
 
   const newNote = () => {
-    // TODO:
+    // TODO: send POST request to the server
+    counter += 1;
+    const newID = counter;
+    updateNotesList(x => [...x, {id: newID}]);
   };
   const selectNote = (id) => {
-    // TODO:
+    // TODO: send GET request to server
     console.log("select", id);
   };
   const deleteNote = (id) => {
-    // TODO: send delete request to server
+    // TODO: send DELETE request to server
     console.log("delete", id);
   };
   
   return (
     <>
-      <Button type="primary" onClick={get_notes_list}>به‌روزرسانی فهرست</Button>
+      <Button type="primary" onClick={newNote}>ساخت یادداشت جدید</Button>
       <div dir="rtl">فهرست یادداشت‌ها:</div>
       <div>
       {notesList.map(function(d, idx){
         return (
           <>
             <div dir="rtl" key={idx}>
-              {d.title}
+              {d.id}
               <Button type="primary" onClick={() => selectNote(d.id)}>انتخاب</Button>
               <Button type="primary" onClick={() => deleteNote(d.id)}>پاک کردن</Button>
             </div>
@@ -72,7 +67,7 @@ function ListOfNotes({updateNoteId, updateNoteState}) {
   )
 }
 
-function ShowNote({noteId, noteState, updateNoteState}) {
+function ShowNote({noteId, noteState, updateNoteState, token}) {
   /// markdown support
   /// save button
   const [editorText, updateEditorText] = useState("# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***");
@@ -92,12 +87,12 @@ function ShowNote({noteId, noteState, updateNoteState}) {
 }
 
 
-function Dashboard({updateState}) {
+function Dashboard({updateState, token}) {
   /// ListOfNotes
   /// ShowNote if a note selected
   /// EditOrPostNote if edit or post note
   const [noteId, updateNoteId] = useState(null);
-  const [noteState, updateNoteState] = useState(NOTE_STATE.show);
+  const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const onSend = () => {};
   const log_out = () => updateState(x => (STATES.login));
   return (
@@ -106,9 +101,10 @@ function Dashboard({updateState}) {
         <ListOfNotes
           updateNoteId={updateNoteId}
           updateNoteState={updateNoteState}
+          token={token}
         />
       }
-      {noteState === NOTE_STATE.show && <ShowNote noteId={noteId}  noteState={noteState} updateNoteState={updateNoteState}/>}
+      {noteState === NOTE_STATE.show && <ShowNote token={token} noteId={noteId} noteState={noteState} updateNoteState={updateNoteState}/>}
       <div>
         <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
       </div>
@@ -119,13 +115,13 @@ function Dashboard({updateState}) {
 
 function App() {
   const [state, updateState] = useState(STATES.login);
-  // TODO: token, updateToken
+  const [token, updateToken] = useState(null);
 
   return (
     <>
-      {state === STATES.login && <Login updateState={updateState} />}
+      {state === STATES.login && <Login updateState={updateState} updateToken={updateToken} />}
       {state === STATES.register && <Register updateState={updateState} />}
-      {state === STATES.dashboard && <Dashboard updateState={updateState} />}
+      {state === STATES.dashboard && <Dashboard updateState={updateState} token={token} />}
       <ToastContainer />
     </>
   );
