@@ -1,8 +1,8 @@
 db:
-  host: postgres
-  username: db_admin
-  password: db_admin
-  name: db_admin
+  host: localhost
+  username: db
+  password: db
+  name: db
   port: "5432"
 cache:
   max_size: 10
