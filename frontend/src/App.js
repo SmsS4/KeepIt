@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import ReactMarkdown from 'react-markdown'
 
-import { Login, Register} from './LogReg';
+import { Login} from './LogReg';
 
 const { TextArea } = Input;
 
@@ -124,7 +124,6 @@ function App() {
   return (
     <>
       {state === STATES.login && <Login updateState={updateState} />}
-      {state === STATES.register && <Register updateState={updateState} />}
       {state === STATES.dashboard && <Dashboard updateState={updateState} />}
       <ToastContainer />
     </>
