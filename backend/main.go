@@ -37,13 +37,28 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
+func CheckAuth(c *gin.Context) (string, error) {
+	auth := c.Request.Header.Get("Authorization")
+	if auth == "" {
+		c.JSON(400, gin.H{"error": "please register and login first"})
+		return "", gin.Error{}
+	}
+	token := strings.TrimPrefix(auth, "Bearer ")
+	username := ParseToken(token)
+	if !CheckRatelimit(username) {
+		c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+		return "", gin.Error{}
+	}
+	return username, nil
+}
+
 func main() {
 	kash := cache_api.CreateApi(config.CacheApi)
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowOriginFunc:  func(origin string) bool { return true },
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
@@ -110,32 +125,39 @@ func main() {
 	private := r.Group("/private")
 	private.Use(jwt.Auth(mysupersecretpassword))
 
+	private.POST("/list_note", func(c *gin.Context) {
+		var input NotesListInput
+		if err := c.ShouldBindJSON(&input); err != nil {
+			log.Print(err.Error())
+			c.JSON(400, gin.H{"error": err.Error()})
+			return
+		}
+		username, err := CheckAuth(c)
+		if err != nil {
+			return
+		}
+		if username != "admin" || len(input.Username) == 0 {
+			notes := kash.Get(username + "$" + "notes")
+			c.JSON(200, gin.H{"message": "Fetched", "notes": strings.Split(notes, ",")})
+		} else {
+			notes := kash.Get(input.Username + "$" + "notes")
+			c.JSON(200, gin.H{"message": "Fetched", "notes": strings.Split(notes, ",")})
+		}
+	})
+
 	private.POST("/new_note", func(c *gin.Context) {
 		var input NewNoteInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
-
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.String(400, "please register and login first")
-			c.Abort()
-			return
-		}
-
-		if len(input.Note) == 0 || len(input.Note) > 2048 {
-			c.JSON(400, gin.H{"error": "note length error"})
-			return
-		}
-
-		token := strings.TrimPrefix(auth, "Bearer ")
-		username := ParseToken(token)
-		if !CheckRatelimit(username) {
-			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+		username, err := CheckAuth(c)
+		if err != nil {
 			return
 		}
 		note_id := username + "$" + GenerateId()
+		notes := kash.Get(username + "$" + "notes")
+		kash.Put(username+"$"+"notes", notes+","+note_id)
 		kash.Put(note_id, input.Note)
 		c.JSON(500, gin.H{"message": "Note added", "note_id": note_id})
 	})
@@ -147,15 +169,8 @@ func main() {
 			return
 		}
 
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.JSON(400, gin.H{"error": "please register and login first"})
-			return
-		}
-		token := strings.TrimPrefix(auth, "Bearer ")
-		username := ParseToken(token)
-		if !CheckRatelimit(username) {
-			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+		username, err := CheckAuth(c)
+		if err != nil {
 			return
 		}
 		if username != strings.Split(input.Note_id, "$")[0] && username != "admin" {
@@ -179,15 +194,8 @@ func main() {
 
 	private.GET("/get_note", func(c *gin.Context) {
 		noteId := c.Query("note_id")
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.JSON(400, gin.H{"error": "please register and login first"})
-			return
-		}
-		token := strings.TrimPrefix(auth, "Bearer ")
-		username := ParseToken(token)
-		if !CheckRatelimit(username) {
-			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
+		username, err := CheckAuth(c)
+		if err != nil {
 			return
 		}
 		if username != strings.Split(noteId, "$")[0] && username != "admin" {
@@ -202,27 +210,25 @@ func main() {
 	})
 
 	private.DELETE("/delete_note", func(c *gin.Context) {
-		note_id := c.Query("note_id")
-		auth := c.Request.Header.Get("Authorization")
-		if auth == "" {
-			c.JSON(400, gin.H{"error": "please register and login first"})
+		noteId := c.Query("note_id")
+		username, err := CheckAuth(c)
+		if err != nil {
 			return
 		}
-		token := strings.TrimPrefix(auth, "Bearer ")
-		username := ParseToken(token)
-		if !CheckRatelimit(username) {
-			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
-			return
-		}
-		if username != strings.Split(note_id, "$")[0] && username != "admin" {
+		if username != strings.Split(noteId, "$")[0] && username != "admin" {
 			c.JSON(400, gin.H{"error": "you are not authorized to delete note"})
 			return
 		}
-		if kash.Get(note_id) == "" {
+		if kash.Get(noteId) == "" {
 			c.JSON(400, gin.H{"error": "note doesn't exist"})
 			return
 		}
-		kash.Put(note_id, "")
+		kash.Put(noteId, "")
+		notes := kash.Get(username + "$" + "notes")
+		notes = strings.Replace(notes, noteId+",", "", -1)
+		notes = strings.Replace(notes, ","+noteId, "", -1)
+		notes = strings.Replace(notes, noteId, "", -1)
+		kash.Put(username+"$"+"notes", notes)
 		c.JSON(200, gin.H{"message": "note deleted successfully"})
 	})
 

@@ -23,6 +23,10 @@ type NewNoteInput struct {
 	Note string `json:"note" binding:"required"`
 }
 
+type NotesListInput struct {
+	Username string `json:"username"`
+}
+
 type UpdateNoteInput struct {
 	Note_id string `json:"note_id" binding:"required"`
 	Note    string `json:"note" binding:"required"`
