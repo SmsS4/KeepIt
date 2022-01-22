@@ -232,5 +232,5 @@ func main() {
 		c.JSON(200, gin.H{"message": "note deleted successfully"})
 	})
 
-	r.Run("localhost:" + config.GatewayConfig.Port)
+	r.Run("0.0.0.0:" + config.GatewayConfig.Port)
 }
