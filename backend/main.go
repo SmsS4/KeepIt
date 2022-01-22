@@ -1,110 +1,22 @@
 package main
 
 import (
-	"io/ioutil"
-	"log"
-	"math/rand"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
 	"github.com/SmsS4/KeepIt/backend/cache_api"
-	"github.com/SmsS4/KeepIt/cache/utils"
 	jwt_lib "github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/contrib/jwt"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/yaml.v2"
 )
-
-type GatewayConfig struct {
-	Port               string
-	RateLimitPerMinute int
-}
-
-type Config struct {
-	CacheApi      cache_api.CacheConfig
-	GatewayConfig GatewayConfig
-}
 
 var (
 	mysupersecretpassword = "unicornsAreAwesome"
 )
 
-type UserInput struct {
-	Username string `json:"username" binding:"required"`
-	Password string `json:"password" binding:"required"`
-}
-
-type NewNoteInput struct {
-	Note string `json:"note" binding:"required"`
-}
-
-type UpdateNoteInput struct {
-	Note_id string `json:"note_id" binding:"required"`
-	Note    string `json:"note" binding:"required"`
-}
-
-func GenerateId() string {
-	res := strconv.Itoa(rand.Intn(99999999-10000000) + 10000000)
-	return res
-}
-
-func ParseToken(tokenStr string) string {
-
-	//creating the token
-	token, _ := jwt_lib.Parse(tokenStr, func(token *jwt_lib.Token) (interface{}, error) {
-		return mysupersecretpassword, nil
-	})
-	claims, _ := token.Claims.(jwt_lib.MapClaims)
-	username := claims["username"].(string)
-	return username
-}
-
-func getGatewayConfig(data map[string]string) GatewayConfig {
-	port, err := strconv.Atoi(data["ratelimit-per-minute"])
-	utils.CheckError(err)
-	return GatewayConfig{
-		Port:               data["port"],
-		RateLimitPerMinute: port,
-	}
-}
-
-func getConfig(configPath string) Config {
-	log.Print("Getting config")
-	configFile, err := ioutil.ReadFile(configPath)
-	utils.CheckError(err)
-	configMap := make(map[string]map[string]string)
-	utils.CheckError(yaml.Unmarshal(configFile, &configMap))
-	return Config{
-		CacheApi:      cache_api.GetCacheConfig(configMap["cache"]),
-		GatewayConfig: getGatewayConfig(configMap["gateway"]),
-	}
-}
-
 var rateLimit = make(map[string][]int64)
-var config = getConfig(os.Args[1])
-
-func relaxRatelimit(requests []int64) {
-	timestamp := time.Now().Unix()
-	for len(requests) > 0 {
-		if (timestamp - requests[0]) > 60 {
-			requests = requests[1:]
-		}
-	}
-}
-
-func checkRatelimit(username string) bool {
-	if _, ok := rateLimit[username]; !ok {
-		rateLimit[username] = make([]int64, 0)
-	}
-	relaxRatelimit(rateLimit[username])
-	if len(rateLimit[username]) > config.GatewayConfig.RateLimitPerMinute {
-		return false
-	}
-	rateLimit[username] = append(rateLimit[username], time.Now().Unix())
-	return true
-}
+var config = GetConfig(os.Args[1])
 
 func main() {
 	kash := cache_api.CreateApi(config.CacheApi)
@@ -189,7 +101,7 @@ func main() {
 
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-		if !checkRatelimit(username) {
+		if !CheckRatelimit(username) {
 			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
 			return
 		}
@@ -213,7 +125,7 @@ func main() {
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-		if !checkRatelimit(username) {
+		if !CheckRatelimit(username) {
 			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
 			return
 		}
@@ -246,7 +158,7 @@ func main() {
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-		if !checkRatelimit(username) {
+		if !CheckRatelimit(username) {
 			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
 			return
 		}
@@ -271,7 +183,7 @@ func main() {
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
 		username := ParseToken(token)
-		if !checkRatelimit(username) {
+		if !CheckRatelimit(username) {
 			c.JSON(429, gin.H{"error": "ratelimit exceeded"})
 			return
 		}

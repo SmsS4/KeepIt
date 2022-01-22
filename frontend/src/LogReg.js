@@ -1,13 +1,10 @@
 import { ToastContainer, toast } from 'react-toastify';
 import {  Input, Button, Checkbox, Card, Spin, message } from 'antd';
 import React from 'react';
-import ReactDOM from 'react-dom';
 
 const BASE = "http://localhost:8080"
 const LOGIN_URL = `${BASE}/pub/login/`
 const REGISTER_URL = `${BASE}/pub/register/`
-
-const notify = (msg) => toast(msg);
 
 const STATES = {
   'login': 2,
@@ -52,23 +49,30 @@ const inputStyle = {
   width: '100%'
 };
 
+const submitStyleHover = {
+  
+}
+
 const submitStyle = {
+  "&:hover": {
+    transform: "scale(1.1, 1.1)",
+  },
   margin: '10px 0 0 0',
   padding: '7px 10px',
-  border: '1px solid #efffff',
-  borderRadius: '3px',
-  background: '#3085d6',
+  // border: '1px solid #efffff',
+  // borderRadius: '3px',
+  // background: '#3085d6',
   width: '100%', 
   fontSize: '15px',
-  color: 'white',
+  // color: 'white',
   display: 'block'
 };
 
-const Field = React.forwardRef(({label, type}, ref) => {
+const Field = React.forwardRef(({placeholder, label, type}, ref) => {
   return (
     <div>
       <label style={labelStyle} >{label}</label>
-      <input ref={ref} type={type} style={inputStyle} />
+      <input placeholder={placeholder} ref={ref} type={type} style={inputStyle} />
     </div>
   );
 });
@@ -91,11 +95,11 @@ const Form = ({onLogin, onRegister}) => {
   };
   return (
     <form style={formStyle} onSubmit={handleSubmit} >
-      <Field ref={usernameRef} label="Username:" type="text" />
-      <Field ref={passwordRef} label="Password:" type="password" />
+      <Field placeholder="Username" ref={usernameRef}  label="Username:" type="text" />
+      <Field placeholder="Password" ref={passwordRef} label="Password:" type="password" />
       <div>
-        <button onClick={() => (setIsLogin(true))} style={submitStyle} type="submit">{"ورود"}</button>
-        <button onClick={() => (setIsLogin(false))} style={submitStyle} type="submit">{"ثبت نام"}</button>
+        <button onClick={() => (setIsLogin(true))} style={submitStyle} type="primary">{"Login"}</button>
+        <button onClick={() => (setIsLogin(false))} style={submitStyle} type="primary">{"Register"}</button>
       </div>
     </form>
   );
@@ -103,44 +107,74 @@ const Form = ({onLogin, onRegister}) => {
 
 
 function Login({updateState}) {
-    /// username
-    /// password
-    /// link to go to register
     const login_request = (data) => {
-      notify("Sending login request to server...");
-      let success = true;
-      if (success) {
-        notify("ورودت موفقیت‌آمیز بود عزیزم!");
-        updateState(x => (STATES.dashboard));
-      } else {
-        notify("مشکلی در ورودت پیش اومد. دوباره تلاش کن.");
-      }
+      toast("Sending login request to server...");
+      fetch(LOGIN_URL,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(data)
+        }
+      )
+      .then(response => {
+        return response.json();
+      })
+      .then(function (data) {
+        console.log(data)
+        toast.dismiss()
+        if (data["error"]){
+          toast.error(data["error"])
+        }else {
+          toast.success(data["message"])
+          updateState(STATES.dashboard)
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     };
 
     const register_request = (data) => {
-      notify("Sending register request to server...");
-
-      fetch(REGISTER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
-      .then(response => response.json())
-      .then(data => {
-        console.log('Success:', data);
-      })
-      .catch((error) => {
-        console.error('Error:', error);
-      });
-
-      let success = true;
-      if (success) {
-        notify("ثبت نام با موفقیت انجام شد.");
-      } else {
-        notify("مشکلی در ثبت نام شما پیش آمد. دوباره تلاش کنید.");
+      if (data['username'].length == 0) {
+        toast.error("Please input valid username")
+        return 
+      } 
+      if (data['password'].length == 0) {
+        toast.error("Please input valid password")
+        return 
+      } 
+      if (data['password'].length > 55) {
+        toast.error("Username should be less than 56")
+        return 
+      } 
+      if (data['username'].indexOf('$') != -1) {
+        toast.error("Username should not have `$`")
+        return 
       }
+      toast("Sending register request to server...");
+
+      fetch(REGISTER_URL,
+        {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(data)
+        }
+      )
+      .then(response => {
+        return response.json();
+      })
+      .then(function (data) {
+        console.log(data)
+        toast.dismiss()
+        if (data["error"]){
+          toast.error(data["error"])
+        }else {
+          toast.success(data["message"])
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
     };
 
     return (
@@ -150,7 +184,7 @@ function Login({updateState}) {
       </div>
       </>
     )
-  }
+};
 
 
 export {Login}
