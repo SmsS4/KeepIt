@@ -25,6 +25,7 @@ const NOTE_STATE = {
   'show': 1,
 };
 
+// just for test... remove this counter after test:
 let counter = 50;
 
 
@@ -39,7 +40,11 @@ function ListOfNotes({updateNoteId, updateNoteState, token}) {
   };
   const selectNote = (id) => {
     // TODO: send GET request to server
-    console.log("select", id);
+    const success = true;
+    if (success) {
+      console.log("select", id);
+      updateNoteState(x => NOTE_STATE.show); 
+    }
   };
   const deleteNote = (id) => {
     // TODO: send DELETE request to server
@@ -68,33 +73,40 @@ function ListOfNotes({updateNoteId, updateNoteState, token}) {
 }
 
 function ShowNote({noteId, noteState, updateNoteState, token}) {
-  /// markdown support
-  /// save button
   const [editorText, updateEditorText] = useState("# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***");
   
   const onChange = e => {
     updateEditorText(x => e.target.value);
   };
 
+  const saveNote = () => {
+    // TODO: send PUT request to server by noteID
+  };
+
+  const close = () => updateNoteState(x => NOTE_STATE.none);
+
   return (
     <>
-      <TextArea showCount maxLength={1000} style={{ width: "90%", height: 250 }} onChange={onChange} defaultValue={editorText} />
-      <div style={{ width: "90%", height: 250 }}>
+      <TextArea showCount maxLength={1000} style={{ width: "90%", height: 200 }} onChange={onChange} defaultValue={editorText} />
+      <div style={{ width: "90%", height: 200 }}>
         <ReactMarkdown>{editorText}</ReactMarkdown>
+      </div>
+      <div>
+        <Button type="primary" onClick={saveNote}>ذخیره یادداشت</Button>
+        <Button type="primary" onClick={close}>بستن یادداشت</Button>
       </div>
     </>
   )
 }
 
 
-function Dashboard({updateState, token}) {
-  /// ListOfNotes
-  /// ShowNote if a note selected
-  /// EditOrPostNote if edit or post note
+function Dashboard({updateState, token, updateToken}) {
   const [noteId, updateNoteId] = useState(null);
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
-  const onSend = () => {};
-  const log_out = () => updateState(x => (STATES.login));
+  const log_out = () => {
+    updateToken(x => null);
+    updateState(x => STATES.login);
+  };
   return (
     <>
       {

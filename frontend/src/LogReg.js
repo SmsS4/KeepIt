@@ -106,7 +106,7 @@ const Form = ({onLogin, onRegister}) => {
 };
 
 
-function Login({updateState}) {
+function Login({updateState, updateToken}) {
     const login_request = (data) => {
       toast("Sending login request to server...");
       fetch(LOGIN_URL,
@@ -126,6 +126,7 @@ function Login({updateState}) {
           toast.error(data["error"])
         }else {
           toast.success(data["message"])
+          updateToken(data["token"])
           updateState(STATES.dashboard)
         }
       })
