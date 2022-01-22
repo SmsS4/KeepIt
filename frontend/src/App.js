@@ -14,7 +14,7 @@ const { TextArea } = Input;
 
 const notify = (msg) => toast(msg);
 
-const BASE = "http://localhost:8080"
+const BASE = "http://185.18.212.202:8080"
 const API = `${BASE}/private/`
 
 const STATES = {
@@ -27,18 +27,17 @@ const NOTE_STATE = {
   'show': 1,
 };
 
-// just for test... remove this counter after test:
-let counter = 50;
+const default_text = "# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***";
 
 
 function ListOfNotes({updateNoteId, updateNoteState, token}) {
-  const [notesList, updateNotesList] = useState([{id: 1}, {id: 123}]);
+  const [notesList, updateNotesList] = useState([]);
 
   const newNote = () => {
-    // TODO: send POST request to the server
-    counter += 1;
-    const newID = counter;
-    updateNotesList(x => [...x, {id: newID}]);
+    netNote(token, default_text, data => {
+      console.log(data);
+      updateNotesList(x => [...x, {id: data.note_id}]);
+    });
   };
   const selectNote = (id) => {
     // TODO: send GET request to server
@@ -75,7 +74,7 @@ function ListOfNotes({updateNoteId, updateNoteState, token}) {
 }
 
 function ShowNote({noteId, noteState, updateNoteState, token}) {
-  const [editorText, updateEditorText] = useState("# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***");
+  const [editorText, updateEditorText] = useState();
   
   const onChange = e => {
     updateEditorText(x => e.target.value);
@@ -221,7 +220,7 @@ function App() {
   return (
     <>
       {state === STATES.login && <Login updateState={updateState} updateToken={updateToken}/>}
-      {state === STATES.dashboard && <Dashboard updateState={updateState}  updateToken={updateToken}/>}
+      {state === STATES.dashboard && <Dashboard updateState={updateState} token={token} updateToken={updateToken}/>}
       <ToastContainer />
     </>
   );

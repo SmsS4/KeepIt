@@ -2,7 +2,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import {  Input, Button, Checkbox, Card, Spin, message } from 'antd';
 import React from 'react';
 
-const BASE = "http://localhost:8080"
+const BASE = "http://185.18.212.202:8080"
 const LOGIN_URL = `${BASE}/pub/login/`
 const REGISTER_URL = `${BASE}/pub/register/`
 
@@ -122,9 +122,9 @@ function Login({updateState, updateToken}) {
       .then(function (data) {
         console.log(data)
         toast.dismiss()
-        if (data["error"]){
+        if (data["error"]) {
           toast.error(data["error"])
-        }else {
+        } else {
           console.log(data["token"])
           toast.success(data["message"])
           updateToken(data["token"])
