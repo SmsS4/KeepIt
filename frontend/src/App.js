@@ -33,7 +33,6 @@ const default_text = "# Hello, *world*!\n## salam2\n### salam3\nhello ***majid**
 function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
   const [notesList, updateNotesList] = useState([]);
 
-  // TODO: get list of notes
 
   const newNote = () => {
     console.log("new note");
@@ -65,11 +64,31 @@ function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
       });
     });
   };
-  
+
+  const [username, updateUsername] = useState("");
+
+  const onChangeUsername = e => {
+    updateUsername(x => e.target.value);
+  };
+
+  const getNotesList = () => {
+    getNotesByUsername(token, username, data => {
+      console.log(data.notes.slice(1));
+      updateNotesList(x => [...data.notes.slice(1)]);
+    });
+  };
+
   return (
     <>
-      <Button type="primary" onClick={newNote}>ساخت یادداشت جدید</Button>
+      <div>
+        <Input placeholder="کاربر دلخواه" onChange={onChangeUsername} />
+        <Button type="primary" onClick={getNotesList}>گرفتن فهرست یادداشت‌های کاربر</Button>
+      </div>
+      <div>
+        <Button type="primary" onClick={newNote}>ساخت یادداشت جدید</Button>
+      </div>
       <div dir="rtl">فهرست یادداشت‌ها:</div>
+      
       <div>
       {notesList.map(function(d, idx){
         return (
@@ -234,7 +253,7 @@ function deleteNoteReq(token, noteId, callback) {
 function App() {
   const [state, updateState] = useState(STATES.login);
   const [token, updateToken] = useState(null);
-  // updateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDI4NDg1ODMsInVzZXJuYW1lIjoidGVzdCJ9.Yh_GWeD9bswTsyeNpURMQ07T7bgBSwkQyRY51MQI2hg")
+
   return (
     <>
       {state === STATES.login && <Login updateState={updateState} updateToken={updateToken}/>}
