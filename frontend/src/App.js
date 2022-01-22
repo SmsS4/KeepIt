@@ -30,26 +30,40 @@ const NOTE_STATE = {
 const default_text = "# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***";
 
 
-function ListOfNotes({updateNoteId, updateNoteState, token}) {
+function ListOfNotes({updateNote, updateNoteId, updateNoteState, token}) {
   const [notesList, updateNotesList] = useState([]);
 
+  // TODO: get list of notes
+
   const newNote = () => {
+    console.log("new note");
     netNote(token, default_text, data => {
       console.log(data);
+      console.log("success new note", data.note_id);
       updateNotesList(x => [...x, {id: data.note_id}]);
     });
   };
   const selectNote = (id) => {
-    // TODO: send GET request to server
-    const success = true;
-    if (success) {
-      console.log("select", id);
-      updateNoteState(x => NOTE_STATE.show); 
-    }
+    console.log("select", id);
+    getGote(token, id, data => {
+      console.log("success select", id);
+      updateNote(x => data.note);
+      updateNoteId(x => id);
+      updateNoteState(x => NOTE_STATE.show);
+    });
   };
   const deleteNote = (id) => {
-    // TODO: send DELETE request to server
     console.log("delete", id);
+    deleteNoteReq(token, id, data => {
+      console.log("success delete", id);
+      updateNotesList(x => {
+        let newList = [...x];
+        newList = newList.filter(function( obj ) {
+          return obj.id !== id;
+        });
+        return newList;
+      });
+    });
   };
   
   return (
@@ -74,7 +88,7 @@ function ListOfNotes({updateNoteId, updateNoteState, token}) {
 }
 
 function ShowNote({noteId, noteState, updateNoteState, token}) {
-  const [editorText, updateEditorText] = useState();
+  const [editorText, updateEditorText] = useState("");
   
   const onChange = e => {
     updateEditorText(x => e.target.value);
@@ -102,6 +116,7 @@ function ShowNote({noteId, noteState, updateNoteState, token}) {
 
 
 function Dashboard({updateState, token, updateToken}) {
+  const [note, updateNote] = useState("");
   const [noteId, updateNoteId] = useState(null);
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const log_out = () => {
@@ -112,12 +127,14 @@ function Dashboard({updateState, token, updateToken}) {
     <>
       {
         <ListOfNotes
+          updateNote={updateNote}
           updateNoteId={updateNoteId}
           updateNoteState={updateNoteState}
           token={token}
         />
       }
-      {noteState === NOTE_STATE.show && <ShowNote token={token} noteId={noteId} noteState={noteState} updateNoteState={updateNoteState}/>}
+      {noteState === NOTE_STATE.show &&
+      <ShowNote token={token} noteId={noteId} noteState={noteState} updateNote={updateNote} updateNoteId={updateNoteId} updateNoteState={updateNoteState}/>}
       <div>
         <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
       </div>
@@ -126,16 +143,18 @@ function Dashboard({updateState, token, updateToken}) {
 }
 
 function sendRequest(url, method, token, body, callback, q = '') {
-  fetch(API+url+q,
-  {
+  let request_params = {
     method: method,
     headers: {
       'content-type': 'application/json',
       'Authorization': 'Bearer ' + token,
     },
-    body: JSON.stringify(body),
+  };
+  if (Object.keys(body).length > 0) {
+    request_params.body = JSON.stringify(body);
   }
-  )
+
+  fetch(API+url+q, request_params)
   .then(response => {
     console.log(response)
     return response.json();
@@ -143,9 +162,9 @@ function sendRequest(url, method, token, body, callback, q = '') {
   .then(function (data) {
     console.log(data)
     toast.dismiss()
-    if (data["error"]){
+    if (data["error"]) {
       toast.error(data["error"])
-    }else {
+    } else {
       toast.success(data["message"])
       callback(data)
     }
@@ -179,7 +198,7 @@ function netNote(token, note, callback) {
   )
 }
 
-function updateNote(token, noteId, note, callback) {
+function updateNoteReq(token, noteId, note, callback) {
   sendRequest(
     "update_note",
     "PUT",
@@ -200,7 +219,7 @@ function getGote(token, noteId, callback) {
   )
 }
 
-function deleteNote(token, noteId, callback) {
+function deleteNoteReq(token, noteId, callback) {
   sendRequest(
     "delete_note",
     "DELETE",
