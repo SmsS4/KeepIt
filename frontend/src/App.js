@@ -39,7 +39,7 @@ function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
     netNote(token, default_text, data => {
       console.log(data);
       console.log("success new note", data.note_id);
-      updateNotesList(x => [...x, {id: data.note_id}]);
+      updateNotesList(x => [...x, data.note_id]);
     });
   };
   const selectNote = (id) => {
@@ -58,7 +58,7 @@ function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
       updateNotesList(x => {
         let newList = [...x];
         newList = newList.filter(function( obj ) {
-          return obj.id !== id;
+          return obj !== id;
         });
         return newList;
       });
@@ -72,6 +72,7 @@ function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
   };
 
   const getNotesList = () => {
+    console.log("getting list of notes for:", username);
     getNotesByUsername(token, username, data => {
       console.log(data.notes.slice(1));
       updateNotesList(x => [...data.notes.slice(1)]);
@@ -88,15 +89,14 @@ function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
         <Button type="primary" onClick={newNote}>ساخت یادداشت جدید</Button>
       </div>
       <div dir="rtl">فهرست یادداشت‌ها:</div>
-      
       <div>
       {notesList.map(function(d, idx){
         return (
           <>
             <div dir="rtl" key={idx}>
-              {d.id}
-              <Button type="primary" onClick={() => selectNote(d.id)}>انتخاب</Button>
-              <Button type="primary" onClick={() => deleteNote(d.id)}>پاک کردن</Button>
+              {d}
+              <Button type="primary" onClick={() => selectNote(d)}>انتخاب</Button>
+              <Button type="primary" onClick={() => deleteNote(d)}>پاک کردن</Button>
             </div>
           </>
         )
