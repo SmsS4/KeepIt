@@ -14,8 +14,10 @@ const { TextArea } = Input;
 
 const notify = (msg) => toast(msg);
 
+const BASE = "http://localhost:8080"
+const API = `${BASE}/private/`
+
 const STATES = {
-  'register': 1,
   'login': 2,
   'dashboard': 3,
 };
@@ -124,15 +126,102 @@ function Dashboard({updateState, token, updateToken}) {
   )
 }
 
+function sendRequest(url, method, token, body, callback, q = '') {
+  fetch(API+url+q,
+  {
+    method: method,
+    headers: {
+      'content-type': 'application/json',
+      'Authorization': 'Bearer ' + token,
+    },
+    body: JSON.stringify(body),
+  }
+  )
+  .then(response => {
+    console.log(response)
+    return response.json();
+  })
+  .then(function (data) {
+    console.log(data)
+    toast.dismiss()
+    if (data["error"]){
+      toast.error(data["error"])
+    }else {
+      toast.success(data["message"])
+      callback(data)
+    }
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+}
+
+function getNotesByUsername(token, username, callback) {
+  sendRequest(
+    "list_note",
+    "POST",
+    token,
+    {'username': username},
+    callback
+  )
+}
+
+function getMyNotes(token, callback) {
+  getNotesByUsername(token, "", callback)
+}
+
+function netNote(token, note, callback) {
+  sendRequest(
+    "new_note",
+    "POST",
+    token,
+    {'note': note},
+    callback
+  )
+}
+
+function updateNote(token, noteId, note, callback) {
+  sendRequest(
+    "update_note",
+    "PUT",
+    token,
+    {'note_id': noteId, 'note': note},
+    callback
+  )
+}
+
+function getGote(token, noteId, callback) {
+  sendRequest(
+    "get_note",
+    "GET",
+    token,
+    {},
+    callback,
+    `?note_id=${noteId}`
+  )
+}
+
+function deleteNote(token, noteId, callback) {
+  sendRequest(
+    "delete_note",
+    "DELETE",
+    token,
+    {},
+    callback,
+    `?note_id=${noteId}`
+  )
+}
+
+
 
 function App() {
   const [state, updateState] = useState(STATES.login);
   const [token, updateToken] = useState(null);
-
+  // updateToken("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NDI4NDg1ODMsInVzZXJuYW1lIjoidGVzdCJ9.Yh_GWeD9bswTsyeNpURMQ07T7bgBSwkQyRY51MQI2hg")
   return (
     <>
       {state === STATES.login && <Login updateState={updateState} updateToken={updateToken}/>}
-      {state === STATES.dashboard && <Dashboard updateState={updateState} />}
+      {state === STATES.dashboard && <Dashboard updateState={updateState}  updateToken={updateToken}/>}
       <ToastContainer />
     </>
   );

@@ -125,6 +125,7 @@ function Login({updateState, updateToken}) {
         if (data["error"]){
           toast.error(data["error"])
         }else {
+          console.log(data["token"])
           toast.success(data["message"])
           updateToken(data["token"])
           updateState(STATES.dashboard)
