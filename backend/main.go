@@ -1,12 +1,14 @@
 package main
 
 import (
+	"log"
 	"os"
 	"strings"
 	"time"
 
 	"github.com/SmsS4/KeepIt/backend/cache_api"
 	jwt_lib "github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/contrib/jwt"
 	"github.com/gin-gonic/gin"
 )
@@ -18,9 +20,33 @@ var (
 var rateLimit = make(map[string][]int64)
 var config = GetConfig(os.Args[1])
 
+func CORSMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		log.Print("hey ")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")
+
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(204)
+			return
+		}
+
+		c.Next()
+	}
+}
+
 func main() {
 	kash := cache_api.CreateApi(config.CacheApi)
 	r := gin.Default()
+	r.Use(cors.New(cors.Config{
+		AllowOriginFunc:  func(origin string) bool { return true },
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	public := r.Group("/pub")
 
 	public.POST("/register", func(c *gin.Context) {
@@ -46,11 +72,13 @@ func main() {
 
 		kash.Put(input.Username, input.Password)
 
+		log.Printf("Sucessfuly added %s", input.Username)
+
 		c.JSON(200, gin.H{"message": "user registered succssessfully"})
 
 	})
 
-	public.GET("/login", func(c *gin.Context) {
+	public.POST("/login", func(c *gin.Context) {
 		var input UserInput
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
@@ -72,9 +100,9 @@ func main() {
 		// Sign and get the complete encoded token as a string
 		tokenString, err := token.SignedString([]byte(mysupersecretpassword))
 		if err != nil {
-			c.JSON(500, gin.H{"message": "Could not generate token"})
+			c.JSON(500, gin.H{"error": "Could not generate token"})
 		}
-		c.JSON(200, gin.H{"token": tokenString})
+		c.JSON(200, gin.H{"token": tokenString, "message": "Welcome :)"})
 	})
 
 	private := r.Group("/private")
