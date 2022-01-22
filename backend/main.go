@@ -159,7 +159,7 @@ func main() {
 		notes := kash.Get(username + "$" + "notes")
 		kash.Put(username+"$"+"notes", notes+","+note_id)
 		kash.Put(note_id, input.Note)
-		c.JSON(500, gin.H{"message": "Note added", "note_id": note_id})
+		c.JSON(200, gin.H{"message": "Note added", "note_id": note_id})
 	})
 
 	private.PUT("/update_note", func(c *gin.Context) {
