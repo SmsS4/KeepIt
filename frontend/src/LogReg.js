@@ -122,9 +122,9 @@ function Login({updateState, updateToken}) {
       .then(function (data) {
         console.log(data)
         toast.dismiss()
-        if (data["error"]){
+        if (data["error"]) {
           toast.error(data["error"])
-        }else {
+        } else {
           console.log(data["token"])
           toast.success(data["message"])
           updateToken(data["token"])
