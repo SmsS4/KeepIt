@@ -30,7 +30,7 @@ const NOTE_STATE = {
 const default_text = "# Hello, *world*!\n## salam2\n### salam3\nhello ***majid***";
 
 
-function ListOfNotes({updateNote, updateNoteId, updateNoteState, token}) {
+function ListOfNotes({updateNoteText, updateNoteId, updateNoteState, token}) {
   const [notesList, updateNotesList] = useState([]);
 
   // TODO: get list of notes
@@ -47,7 +47,7 @@ function ListOfNotes({updateNote, updateNoteId, updateNoteState, token}) {
     console.log("select", id);
     getGote(token, id, data => {
       console.log("success select", id);
-      updateNote(x => data.note);
+      updateNoteText(x => data.note);
       updateNoteId(x => id);
       updateNoteState(x => NOTE_STATE.show);
     });
@@ -87,24 +87,23 @@ function ListOfNotes({updateNote, updateNoteId, updateNoteState, token}) {
   )
 }
 
-function ShowNote({noteId, noteState, updateNoteState, token}) {
-  const [editorText, updateEditorText] = useState("");
-  
+function ShowNote({noteText, updateNoteText, noteId, noteState, updateNoteState, token}) {
   const onChange = e => {
-    updateEditorText(x => e.target.value);
+    updateNoteText(x => e.target.value);
   };
 
   const saveNote = () => {
-    // TODO: send PUT request to server by noteID
+    updateNoteReq(token, noteId, noteText, data => {});
   };
 
   const close = () => updateNoteState(x => NOTE_STATE.none);
 
   return (
     <>
-      <TextArea showCount maxLength={1000} style={{ width: "90%", height: 200 }} onChange={onChange} defaultValue={editorText} />
+      <div dir="rtl">شما در حال مشاهده‌ی یادداشت {noteId} هستید.</div>
+      <TextArea showCount maxLength={1000} style={{ width: "90%", height: 200 }} onChange={onChange} value={noteText} />
       <div style={{ width: "90%", height: 200 }}>
-        <ReactMarkdown>{editorText}</ReactMarkdown>
+        <ReactMarkdown>{noteText}</ReactMarkdown>
       </div>
       <div>
         <Button type="primary" onClick={saveNote}>ذخیره یادداشت</Button>
@@ -116,7 +115,7 @@ function ShowNote({noteId, noteState, updateNoteState, token}) {
 
 
 function Dashboard({updateState, token, updateToken}) {
-  const [note, updateNote] = useState("");
+  const [noteText, updateNoteText] = useState("");
   const [noteId, updateNoteId] = useState(null);
   const [noteState, updateNoteState] = useState(NOTE_STATE.none);
   const log_out = () => {
@@ -127,14 +126,14 @@ function Dashboard({updateState, token, updateToken}) {
     <>
       {
         <ListOfNotes
-          updateNote={updateNote}
+          updateNoteText={updateNoteText}
           updateNoteId={updateNoteId}
           updateNoteState={updateNoteState}
           token={token}
         />
       }
       {noteState === NOTE_STATE.show &&
-      <ShowNote token={token} noteId={noteId} noteState={noteState} updateNote={updateNote} updateNoteId={updateNoteId} updateNoteState={updateNoteState}/>}
+      <ShowNote token={token} noteText={noteText} noteId={noteId} noteState={noteState} updateNoteText={updateNoteText} updateNoteId={updateNoteId} updateNoteState={updateNoteState}/>}
       <div>
         <Button type="primary" onClick={log_out}>خروج از اکانت</Button>
       </div>
