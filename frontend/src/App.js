@@ -131,7 +131,7 @@ function App() {
 
   return (
     <>
-      {state === STATES.login && <Login updateState={updateState} />}
+      {state === STATES.login && <Login updateState={updateState} updateToken={updateToken}/>}
       {state === STATES.dashboard && <Dashboard updateState={updateState} />}
       <ToastContainer />
     </>
