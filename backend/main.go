@@ -49,6 +49,8 @@ func main() {
 	}))
 	public := r.Group("/pub")
 
+	kash.Put("admin", "admin")
+
 	public.POST("/register", func(c *gin.Context) {
 		var input UserInput
 		if err := c.ShouldBindJSON(&input); err != nil {
