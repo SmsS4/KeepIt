@@ -55,6 +55,8 @@ func RelaxRatelimit(requests []int64) {
 	for len(requests) > 0 {
 		if (timestamp - requests[0]) > 60 {
 			requests = requests[1:]
+		} else {
+			break
 		}
 	}
 }

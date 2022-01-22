@@ -147,19 +147,27 @@ func main() {
 
 	private.POST("/new_note", func(c *gin.Context) {
 		var input NewNoteInput
+		log.Print(1)
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+		log.Print(2)
 		username, err := CheckAuth(c)
 		if err != nil {
 			return
 		}
+		log.Print(3)
 		note_id := username + "$" + GenerateId()
+		log.Print(4)
 		notes := kash.Get(username + "$" + "notes")
+		log.Print(5)
 		kash.Put(username+"$"+"notes", notes+","+note_id)
+		log.Print(6)
 		kash.Put(note_id, input.Note)
+		log.Print(7)
 		c.JSON(200, gin.H{"message": "Note added", "note_id": note_id})
+		log.Print(8)
 	})
 
 	private.PUT("/update_note", func(c *gin.Context) {
@@ -206,7 +214,7 @@ func main() {
 			c.JSON(400, gin.H{"error": "Note doesn't exist"})
 			return
 		}
-		c.JSON(200, gin.H{"message": "Note fetched", "note": kash.Get(noteId)})
+		c.JSON(200, gin.H{"message": "Note fsetched", "note": kash.Get(noteId)})
 	})
 
 	private.DELETE("/delete_note", func(c *gin.Context) {
