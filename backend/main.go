@@ -137,7 +137,7 @@ func main() {
 		}
 		note_id := username + "$" + GenerateId()
 		kash.Put(note_id, input.Note)
-		c.JSON(500, gin.H{"note_id": note_id})
+		c.JSON(500, gin.H{"message": "Note added", "note_id": note_id})
 	})
 
 	private.PUT("/update_note", func(c *gin.Context) {
@@ -149,8 +149,7 @@ func main() {
 
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
-			c.String(400, "please register and login first")
-			c.Abort()
+			c.JSON(400, gin.H{"error": "please register and login first"})
 			return
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
@@ -182,8 +181,7 @@ func main() {
 		noteId := c.Query("note_id")
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
-			c.String(400, "please register and login first")
-			c.Abort()
+			c.JSON(400, gin.H{"error": "please register and login first"})
 			return
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
@@ -200,15 +198,14 @@ func main() {
 			c.JSON(400, gin.H{"error": "Note doesn't exist"})
 			return
 		}
-		c.JSON(200, gin.H{"note": kash.Get(noteId)})
+		c.JSON(200, gin.H{"message": "Note fetched", "note": kash.Get(noteId)})
 	})
 
 	private.DELETE("/delete_note", func(c *gin.Context) {
 		note_id := c.Query("note_id")
 		auth := c.Request.Header.Get("Authorization")
 		if auth == "" {
-			c.String(400, "please register and login first")
-			c.Abort()
+			c.JSON(400, gin.H{"error": "please register and login first"})
 			return
 		}
 		token := strings.TrimPrefix(auth, "Bearer ")
